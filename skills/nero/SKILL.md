@@ -27,7 +27,7 @@ Quando o MCP `nero-knowledge-base` estiver disponivel, use-o para consultar, rel
 
 Ordem tipica: `nero_admin_project_health` → (playbook se snapshot stale) → `nero_get_project_context` / dominio / search / related → `nero_register_*` → `nero_admin_reindex` + `nero_admin_validate` (`isValid` e `isCompliant`).
 
-Writers gravam Markdown e **nao** reindexam. Escritas no knowledge em **serie** no fim do lote. Codigo de produto: leia o checkout (filesystem obrigatorio); knowledge: preferir MCP.
+Writers gravam Markdown e **nao** reindexam. Escritas no knowledge em **serie** no fim do lote. Codigo de produto: leia o checkout (filesystem obrigatorio); knowledge: preferir MCP. Em `nero_update_project_*`, omitir `linksSemanticos` preserva links nao-minimos; lista substitui; `[]` limpa.
 
 Fluxo completo e hibrido MCP+filesystem: `references/workflow.md`.
 Tools, contratos e payloads: `references/mcp-tools.md`.

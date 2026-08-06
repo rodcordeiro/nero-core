@@ -10,7 +10,7 @@ Decisões: `CONTEXT.md`, `docs/adr/0001`–`0005`.
 
 - **Fase 0** em vigor (freeze: sem remote de share; sem commit até Fases 1–6).
 - **Fases 1–6** — ACCEPT (ver tabela Gauntlet).
-- **Fase 7 Clean Genesis** — primeiro commit local feito; remote privado e CI ainda abertos.
+- **Fase 7 Clean Genesis** — primeiro commit local feito; remote privado OK; CI ainda aberto.
 - Glossário e ADRs de fronteira gravados (texto sem marca de origem).
 - Checklist de higiene local verde.
 
@@ -114,7 +114,7 @@ Antes de qualquer commit/share:
 ### Fase 7 — Clean Genesis
 
 - [x] Primeiro commit = tree limpo (Core + Kit + Scaffold + docs).
-- [ ] Remote **privado**; convidar amigos.
+- [x] Remote **privado** (`origin` → `nero-core`); convidar amigos.
 - [ ] (Depois) CI mínimo (ex. GitHub Actions) — fora do dia 1.
 
 **DoD:** histórico sem blob de origem; MIT no commit inicial.
@@ -154,4 +154,4 @@ Para **cada fase** (1–6; 7 só com pedido explícito de commit):
 | 4 Scaffold | ACCEPT-WITH-GAPS | Supervisor | [Nyx](bedbc263-f0fe-44d7-a4e2-f089b971f32d) | `.gitignore` pós-critic |
 | 5 Docs | ACCEPT | Supervisor | [Nyx](c3472920-34e3-447e-9eae-44f9a82a0fb6) | — |
 | 6 Higiene | ACCEPT | Supervisor | [Nyx](13ef56c0-8dee-4d67-8633-981fecceb819) | — |
-| 7 Genesis | commit local | Supervisor | — | remote/CI pendentes |
+| 7 Genesis | commit + remote privado | Supervisor | — | CI pendente |

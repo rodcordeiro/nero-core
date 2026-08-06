@@ -5,7 +5,7 @@
 Use o MCP como camada preferencial para busca, contexto consolidado, grafo, registro controlado e reindexacao **sob demanda** do Knowledge Repo (`KnowledgeRoot__Path`).
 
 Nao trate o MCP como unica fonte de verdade quando a tarefa depender do estado real do checkout local. Para inventario tecnico, rotas, DI, `.csproj`, migrations, contratos publicos, configuracoes, Dockerfile, pipelines, riscos operacionais e comportamento efetivo do codigo, valide os arquivos diretamente no repositorio.
-`nero_register_project` cria `index.md` / `context.md` apenas quando ausentes. Para **atualizar** index, context ou inventory use `nero_update_project_index`, `nero_update_project_context` e `nero_update_project_inventory` (Marco 21). Escrita livre de Markdown nesses arquivos fica reservada a casos em que o MCP estiver indisponivel.
+`nero_register_project` cria `index.md` / `context.md` apenas quando ausentes. Para **atualizar** index, context ou inventory use `nero_update_project_index`, `nero_update_project_context` e `nero_update_project_inventory` (Marco 21). Em `linksSemanticos`, omitir preserva nao-minimos; lista substitui; `[]` limpa (Marco 21 P3). Escrita livre de Markdown nesses arquivos fica reservada a casos em que o MCP estiver indisponivel.
 
 Lifecycle de dominio: `nero_register_domain` / `nero_update_domain` / `nero_inactivate_domain` (Marco 22). Allowlist de dominio em `register_project` / `update_project_*` e descoberta no filesystem (`domains/*/index.md` com `status` ausente ou `active`). Domains inativos nao aceitam novos projects ate `nero_update_domain` com `reativar=true`.
 
@@ -331,6 +331,16 @@ Soft-delete: grava `status: inactive` no `index.md` (pasta permanece). Sempre ex
 
 Reescreve `projects/<Projeto>/index.md` a partir de campos estruturados (template hibrido). **Exige** `index.md` existente; bootstrap so via `nero_register_project`. **Nao reindexa**.
 
+**Contrato de** `linksSemanticos` **(Marco 21 P3 — evita clobber de grafo):**
+
+| Input | Efeito |
+| --- | --- |
+| omitido / `null` | **Preserva** links nao-minimos ja existentes (`uses_backend`, `depends_on`, …) |
+| lista explicita | **Substitui** o conjunto (envie a lista completa desejada) |
+| `[]` (lista vazia) | **Remove todos** os nao-minimos de proposito |
+
+Links minimos (`documents`, `belongs_to_domain`) sempre sao derivados de `projeto` / `dominio` — nao passe esses tipos em `linksSemanticos`. Formato de cada item: `type:target` (ex.: `uses_backend:projects/Acme.X.Api`). Direcao G3 e aplicada (`uses_backend`/`depends_on` invertidos sao rejeitados). Nunca dependa so de `nero_link_knowledge` para durar (edge so no SQLite; reindex descarta se ausente no Markdown).
+
 Input:
 
 ```json
@@ -339,7 +349,8 @@ Input:
   "dominio": "api",
   "proposito": "API de autenticacao da Acme.",
   "arquivos": ["context.md", "inventory.md"],
-  "origem": "Review de knowledge"
+  "origem": "Review de knowledge",
+  "linksSemanticos": ["depends_on:projects/Acme.Ldap.Api"]
 }
 ```
 
@@ -348,6 +359,8 @@ Input:
 ## `nero_update_project_context`
 
 Reescreve `projects/<Projeto>/context.md` a partir de campos estruturados. **Exige** `index.md` e `context.md` existentes. Evidencia longa deve ir para snapshot, nao no resumo. **Nao reindexa**.
+
+Mesmo contrato de `linksSemanticos` que `nero_update_project_index` (omitir preserva; lista substitui; `[]` limpa).
 
 Input:
 
@@ -369,6 +382,8 @@ Input:
 ## `nero_update_project_inventory`
 
 Cria ou reescreve `projects/<Projeto>/inventory.md` (upsert). **Exige** `index.md`. Nao gravar secrets, tokens nem paths locais com credenciais. **Nao reindexa**.
+
+Mesmo contrato de `linksSemanticos` que `nero_update_project_index` (omitir preserva; lista substitui; `[]` limpa).
 
 Input:
 

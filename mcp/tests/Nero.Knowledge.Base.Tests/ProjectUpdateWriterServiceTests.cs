@@ -210,7 +210,182 @@ public class ProjectUpdateWriterServiceTests
         Assert.Contains("read_only", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
 
-    private static string CreateTempKnowledgeRoot()
+    [Fact]
+    public async Task UpdateContextAsync_PreservesSemanticLinksWhenOmitted()
+    {
+        var root = CreateTempKnowledgeRoot(includeFront: true);
+        await new ProjectWriterService().WriteAsync(
+            root,
+            new RegisterProjectRequest
+            {
+                Project = "Acme.Line.Front",
+                Domain = "front",
+                Purpose = "Bootstrap front",
+                Origin = "test"
+            });
+
+        var updater = new ProjectUpdateWriterService();
+        await updater.UpdateContextAsync(
+            root,
+            new UpdateProjectContextRequest
+            {
+                Project = "Acme.Line.Front",
+                Domain = "front",
+                Purpose = "Front com backend",
+                Stack = "Next.js",
+                Superficie = "Web",
+                ResumoOperacional = "Contexto inicial.",
+                SemanticLinks =
+                [
+                    new ProjectSemanticLink
+                    {
+                        Type = "uses_backend",
+                        Target = "projects/Acme.Line.Api"
+                    },
+                    new ProjectSemanticLink
+                    {
+                        Type = "depends_on",
+                        Target = "projects/Acme.Auth.Api"
+                    }
+                ]
+            });
+
+        var preserved = await updater.UpdateContextAsync(
+            root,
+            new UpdateProjectContextRequest
+            {
+                Project = "Acme.Line.Front",
+                Domain = "front",
+                Purpose = "Front atualizado",
+                Stack = "Next.js 15",
+                Superficie = "Web",
+                ResumoOperacional = "Sem tocar nos links."
+            });
+
+        var preservedMarkdown = await File.ReadAllTextAsync(preserved.Path);
+        Assert.Contains("Front atualizado", preservedMarkdown);
+        Assert.Contains("uses_backend", preservedMarkdown);
+        Assert.Contains("projects/Acme.Line.Api", preservedMarkdown);
+        Assert.Contains("depends_on", preservedMarkdown);
+        Assert.Contains("projects/Acme.Auth.Api", preservedMarkdown);
+
+        var replaced = await updater.UpdateContextAsync(
+            root,
+            new UpdateProjectContextRequest
+            {
+                Project = "Acme.Line.Front",
+                Domain = "front",
+                Purpose = "Front com gateway",
+                Stack = "Next.js",
+                Superficie = "Web",
+                ResumoOperacional = "Substitui links.",
+                SemanticLinks =
+                [
+                    new ProjectSemanticLink
+                    {
+                        Type = "uses_backend",
+                        Target = "projects/Acme.Gateway.Api"
+                    }
+                ]
+            });
+
+        var replacedMarkdown = await File.ReadAllTextAsync(replaced.Path);
+        Assert.Contains("projects/Acme.Gateway.Api", replacedMarkdown);
+        Assert.DoesNotContain("projects/Acme.Line.Api", replacedMarkdown);
+        Assert.DoesNotContain("depends_on", replacedMarkdown);
+
+        var cleared = await updater.UpdateContextAsync(
+            root,
+            new UpdateProjectContextRequest
+            {
+                Project = "Acme.Line.Front",
+                Domain = "front",
+                Purpose = "Sem links extras",
+                Stack = "Next.js",
+                Superficie = "Web",
+                ResumoOperacional = "Limpeza.",
+                SemanticLinks = []
+            });
+
+        var clearedMarkdown = await File.ReadAllTextAsync(cleared.Path);
+        Assert.Contains("belongs_to_domain", clearedMarkdown);
+        Assert.DoesNotContain("uses_backend", clearedMarkdown);
+        Assert.DoesNotContain("projects/Acme.Gateway.Api", clearedMarkdown);
+    }
+
+    [Fact]
+    public async Task UpdateIndexAsync_RejectsInvertedUsesBackend()
+    {
+        var root = CreateTempKnowledgeRoot(includeFront: true);
+        await new ProjectWriterService().WriteAsync(
+            root,
+            new RegisterProjectRequest
+            {
+                Project = "Acme.Line.Api",
+                Domain = "api",
+                Purpose = "Bootstrap api",
+                Origin = "test"
+            });
+
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
+            new ProjectUpdateWriterService().UpdateIndexAsync(
+                root,
+                new UpdateProjectIndexRequest
+                {
+                    Project = "Acme.Line.Api",
+                    Domain = "api",
+                    Purpose = "Nao deve gravar",
+                    Arquivos = ["context.md"],
+                    SemanticLinks =
+                    [
+                        new ProjectSemanticLink
+                        {
+                            Type = "uses_backend",
+                            Target = "projects/Acme.Line.Front"
+                        }
+                    ]
+                }));
+
+        Assert.Contains("inverted", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task UpdateIndexAsync_RejectsMinimalTypeInSemanticLinks()
+    {
+        var root = CreateTempKnowledgeRoot();
+        await new ProjectWriterService().WriteAsync(
+            root,
+            new RegisterProjectRequest
+            {
+                Project = "Acme.Update.Api",
+                Domain = "api",
+                Purpose = "Bootstrap",
+                Origin = "test"
+            });
+
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
+            new ProjectUpdateWriterService().UpdateIndexAsync(
+                root,
+                new UpdateProjectIndexRequest
+                {
+                    Project = "Acme.Update.Api",
+                    Domain = "api",
+                    Purpose = "x",
+                    Arquivos = ["context.md"],
+                    SemanticLinks =
+                    [
+                        new ProjectSemanticLink
+                        {
+                            Type = "documents",
+                            Target = "projects/Acme.Update.Api"
+                        }
+                    ]
+                }));
+
+        Assert.Contains("minimal link", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string CreateTempKnowledgeRoot(bool includeFront = false)
     {
         var path = Path.Combine(
             Path.GetTempPath(),
@@ -222,6 +397,14 @@ public class ProjectUpdateWriterServiceTests
         File.WriteAllText(
             Path.Combine(path, "domains", "api", "index.md"),
             "---\ntype: domain_index\nscope: domain\ndomain: api\nstatus: active\n---\n# api\n");
+        if (includeFront)
+        {
+            Directory.CreateDirectory(Path.Combine(path, "domains", "front"));
+            File.WriteAllText(
+                Path.Combine(path, "domains", "front", "index.md"),
+                "---\ntype: domain_index\nscope: domain\ndomain: front\nstatus: active\n---\n# front\n");
+        }
+
         return path;
     }
 }

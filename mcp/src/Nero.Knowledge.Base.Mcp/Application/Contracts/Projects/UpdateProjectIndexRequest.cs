@@ -11,4 +11,11 @@ public sealed class UpdateProjectIndexRequest
     public required IReadOnlyList<string> Arquivos { get; init; }
 
     public string? Origin { get; init; }
+
+    /// <summary>
+    /// Non-minimal preferred links (<c>uses_backend</c>, <c>depends_on</c>, …).
+    /// Null/omitted preserves existing links in the Markdown; explicit list replaces; empty clears.
+    /// Minimal <c>documents</c> / <c>belongs_to_domain</c> are always derived from projeto/dominio.
+    /// </summary>
+    public IReadOnlyList<ProjectSemanticLink>? SemanticLinks { get; init; }
 }

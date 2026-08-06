@@ -89,15 +89,17 @@ Análise de repositórios de produto pode continuar em paralelo; consolidar e gr
 | Registrar dominio novo | `nero_register_domain` | `dominio`, `proposito`, `origem` (+ `arquivos`) |
 | Atualizar / reativar dominio | `nero_update_domain` | `dominio`, `proposito`, `arquivos` (+ `reativar` se inactive; `sourceFor` omitido preserva links) |
 | Inativar dominio | `nero_inactivate_domain` | `dominio`, `motivo`, `origem` (+ `confirmacao`/`evidencia` se houver projetos) |
-| Atualizar index do projeto | `nero_update_project_index` | `projeto`, `dominio`, `proposito`, `arquivos` (+ `origem`) |
-| Atualizar context do projeto | `nero_update_project_context` | `projeto`, `dominio`, `proposito`, `stack`, `superficie`, `resumoOperacional` (+ `skillOperacional`, `origem`) |
-| Criar/atualizar inventory do projeto | `nero_update_project_inventory` | `projeto`, `dominio`, `revisadoEm`, `classificacao`, `sinaisTecnicos` (+ git/origem) |
+| Atualizar index do projeto | `nero_update_project_index` | `projeto`, `dominio`, `proposito`, `arquivos` (+ `origem`, `linksSemanticos`) |
+| Atualizar context do projeto | `nero_update_project_context` | `projeto`, `dominio`, `proposito`, `stack`, `superficie`, `resumoOperacional` (+ `skillOperacional`, `origem`, `linksSemanticos`) |
+| Criar/atualizar inventory do projeto | `nero_update_project_inventory` | `projeto`, `dominio`, `revisadoEm`, `classificacao`, `sinaisTecnicos` (+ git/origem, `linksSemanticos`) |
 | Regra de negócio comprovada | `nero_register_business_rule` | `titulo`, `escopo`, `regra`, `evidencia`, `origem` (+ `projeto`/`dominio`) |
 | Decisão técnica / mudança de orientação | `nero_register_decision` | `titulo`, `escopo`, `problema`, `opcoes`, `decisao`, `consequencias`, `origem`; se substitui decisão antiga: `supersedes=[path/id da decision]` |
 | Padrão reutilizável | `nero_register_pattern` | `titulo`, `escopo`, `contexto`, `padrao`, `quandoAplicar`, `quandoNaoAplicar`, `origem`; opcional `usadoPor`, `candidatoParaReuso`, `exemplos`, `excecoes` |
 | Validação / teste / critério de aceite | `nero_register_validation_rule` | `titulo`, `escopo`, `regra`, `criterio`, `evidencia`, `origem`; opcional `lacunasConhecidas` |
 | Inventário técnico, snapshot pontual, tribal knowledge com evidência, débito técnico observado | `nero_register_snapshot` | `titulo`, `escopo`, `contexto`, `evidencia`, `origem`; opcional `relacionadoA`, `evidenciaDe` |
 | Incidente / troubleshooting | `nero_register_troubleshooting` | `titulo`, `escopo`, `sintoma`, `causa`, `acao`, `evidencia`, `impacto`, `origem`; opcional `solucao`, `prevencao`, `causadoPor`, `relacionadoA` |
+
+Contrato `linksSemanticos` (nao-minimos: `uses_backend`, `depends_on`, …): **omitir** preserva os existentes; lista `type:target` substitui o conjunto; `[]` limpa de proposito. `documents`/`belongs_to_domain` sao derivados — nao passe-os. Remova link invalido com lista explicita sem o item (nunca “deixar sumir” por rewrite). Nao depender so de `nero_link_knowledge` para durar apos reindex.
 
 Mapeamento semântico:
 

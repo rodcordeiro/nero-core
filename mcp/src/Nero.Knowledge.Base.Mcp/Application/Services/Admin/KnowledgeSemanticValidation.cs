@@ -125,6 +125,37 @@ internal static class KnowledgeSemanticValidation
     }
 
     /// <summary>
+    /// Writer-facing G3 check: returns an error when <paramref name="relation"/> is
+    /// <c>depends_on</c>/<c>uses_backend</c> and orientation looks inverted (backend → consumer).
+    /// Returns null when the relation is not a dependency type or the edge is allowed/ambiguous.
+    /// </summary>
+    public static string? GetInvertedDependencyError(string sourcePathOrId, string target, string relation)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(sourcePathOrId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(target);
+        ArgumentException.ThrowIfNullOrWhiteSpace(relation);
+
+        var normalized = NormalizeRelation(relation);
+        if (!normalized.Equals("dependson", StringComparison.OrdinalIgnoreCase)
+            && !normalized.Equals("usesbackend", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        var sourceRole = ClassifyNodeRole(sourcePathOrId, sourcePathOrId);
+        var targetRole = ClassifyNodeRole(target, target);
+        if (sourceRole == NodeRole.Backend && targetRole == NodeRole.Consumer)
+        {
+            return
+                $"Relation '{relation}' from '{sourcePathOrId}' → '{target}' looks inverted " +
+                "(API/backend/lib must not depend_on or uses_backend a Front/Mobile consumer). " +
+                "Prefer consumer → backend orientation.";
+        }
+
+        return null;
+    }
+
+    /// <summary>
     /// G3 — reject inverted dependency edges when both ends have clear roles.
     /// Heuristic (pragmatic, prefer false negatives):
     /// - Consumer: Front/Mobile/.Web project tokens, domains/front, domains/mobile.
@@ -138,15 +169,13 @@ internal static class KnowledgeSemanticValidation
         KnowledgeMarkdownLink link,
         string relation)
     {
-        var sourceRole = ClassifyNodeRole(source.Id, source.Path);
-        var targetRole = ClassifyNodeRole(link.Target, link.Target);
-
-        if (sourceRole == NodeRole.Backend && targetRole == NodeRole.Consumer)
+        var error = GetInvertedDependencyError(
+            string.IsNullOrWhiteSpace(source.Path) ? source.Id : source.Path,
+            link.Target,
+            relation);
+        if (error is not null)
         {
-            yield return
-                $"Relation '{relation}' in '{source.Id}' → '{link.Target}' looks inverted " +
-                "(API/backend/lib must not depend_on or uses_backend a Front/Mobile consumer). " +
-                "Prefer consumer → backend orientation.";
+            yield return error;
         }
     }
 

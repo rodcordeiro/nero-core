@@ -41,7 +41,7 @@ Use o MCP como camada preferencial para busca, contexto consolidado, grafo, regi
 Nao use o MCP como unica fonte de verdade quando a tarefa exigir validar implementacao real no checkout local. Para inventario tecnico, rotas, DI, `.csproj`, migrations, contratos publicos, configuracoes, Dockerfile, pipelines, riscos operacionais e comportamento efetivo do codigo, leia os arquivos diretamente no repositorio.
 
 - Revisar codigo de produto → leitura via filesystem e **obrigatoria**.
-- Evoluir `index.md` / `context.md` / `inventory.md` do knowledge → preferir `nero_update_project_index|context|inventory` apos bootstrap com `nero_register_project`.
+- Evoluir `index.md` / `context.md` / `inventory.md` do knowledge → preferir `nero_update_project_index|context|inventory` apos bootstrap com `nero_register_project`. Em `linksSemanticos`: omitir **preserva** links nao-minimos; lista explicita substitui; `[]` limpa. Nunca depender so de `nero_link_knowledge` para durar apos reindex.
 - Lifecycle de dominio → preferir `nero_register_domain` / `nero_update_domain` / `nero_inactivate_domain`. Em `nero_update_domain`, omitir `sourceFor` **preserva** os `source_for` existentes; so altere links passando lista explicita (ou `[]` para limpar de proposito).
 - Filesystem permanece para codigo de produto e para edicao manual so se o MCP estiver indisponivel.
 

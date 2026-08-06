@@ -221,7 +221,7 @@ public sealed class NeroKnowledgeTools(
     }
 
     [McpServerTool]
-    [Description("Rewrites projects/<Projeto>/index.md from structured fields (hybrid template). Requires existing index.md; bootstrap with nero_register_project. Does not reindex; call nero_admin_reindex after the write batch.")]
+    [Description("Rewrites projects/<Projeto>/index.md from structured fields (hybrid template). Requires existing index.md; bootstrap with nero_register_project. Non-minimal links: omit linksSemanticos to preserve, pass full list to replace, pass [] to clear. Minimal documents/belongs_to_domain are always derived. Does not reindex; call nero_admin_reindex after the write batch.")]
     public async Task<NeroUpdateProjectFileToolResult> nero_update_project_index(
         [Description("Project name, for example Acme.Auth.Api.")]
         string projeto,
@@ -233,6 +233,8 @@ public sealed class NeroKnowledgeTools(
         IReadOnlyList<string> arquivos,
         [Description("Optional origin note for the update.")]
         string? origem = null,
+        [Description("Optional non-minimal preferred links as 'type:target' (example: uses_backend:projects/Acme.X.Api). Omit to preserve existing; pass the full desired list to replace; pass [] to clear all intentionally. Do not pass documents or belongs_to_domain.")]
+        IReadOnlyList<string>? linksSemanticos = null,
         CancellationToken cancellationToken = default)
     {
         var startedTimestamp = Stopwatch.GetTimestamp();
@@ -247,7 +249,8 @@ public sealed class NeroKnowledgeTools(
                     Domain = dominio,
                     Purpose = proposito,
                     Arquivos = arquivos,
-                    Origin = origem
+                    Origin = origem,
+                    SemanticLinks = ProjectSemanticLinkMerger.ParseToolInput(linksSemanticos)
                 },
                 cancellationToken);
 
@@ -266,7 +269,7 @@ public sealed class NeroKnowledgeTools(
     }
 
     [McpServerTool]
-    [Description("Rewrites projects/<Projeto>/context.md from structured fields (hybrid template). Requires existing context.md and index.md; bootstrap with nero_register_project. Does not reindex; call nero_admin_reindex after the write batch.")]
+    [Description("Rewrites projects/<Projeto>/context.md from structured fields (hybrid template). Requires existing context.md and index.md; bootstrap with nero_register_project. Non-minimal links: omit linksSemanticos to preserve, pass full list to replace, pass [] to clear. Minimal documents/belongs_to_domain are always derived. Does not reindex; call nero_admin_reindex after the write batch.")]
     public async Task<NeroUpdateProjectFileToolResult> nero_update_project_context(
         [Description("Project name, for example Acme.Auth.Api.")]
         string projeto,
@@ -284,6 +287,8 @@ public sealed class NeroKnowledgeTools(
         string? skillOperacional = null,
         [Description("Optional origin note for the update.")]
         string? origem = null,
+        [Description("Optional non-minimal preferred links as 'type:target' (example: uses_backend:projects/Acme.X.Api). Omit to preserve existing; pass the full desired list to replace; pass [] to clear all intentionally. Do not pass documents or belongs_to_domain.")]
+        IReadOnlyList<string>? linksSemanticos = null,
         CancellationToken cancellationToken = default)
     {
         var startedTimestamp = Stopwatch.GetTimestamp();
@@ -301,7 +306,8 @@ public sealed class NeroKnowledgeTools(
                     Superficie = superficie,
                     ResumoOperacional = resumoOperacional,
                     SkillOperacional = skillOperacional,
-                    Origin = origem
+                    Origin = origem,
+                    SemanticLinks = ProjectSemanticLinkMerger.ParseToolInput(linksSemanticos)
                 },
                 cancellationToken);
 
@@ -320,7 +326,7 @@ public sealed class NeroKnowledgeTools(
     }
 
     [McpServerTool]
-    [Description("Creates or rewrites projects/<Projeto>/inventory.md from structured fields (upsert). Requires existing index.md. Does not reindex; call nero_admin_reindex after the write batch. Do not pass secrets, tokens or absolute local paths with credentials.")]
+    [Description("Creates or rewrites projects/<Projeto>/inventory.md from structured fields (upsert). Requires existing index.md. Non-minimal links: omit linksSemanticos to preserve, pass full list to replace, pass [] to clear. Does not reindex; call nero_admin_reindex after the write batch. Do not pass secrets, tokens or absolute local paths with credentials.")]
     public async Task<NeroUpdateProjectFileToolResult> nero_update_project_inventory(
         [Description("Project name, for example Acme.Auth.Api.")]
         string projeto,
@@ -340,6 +346,8 @@ public sealed class NeroKnowledgeTools(
         string? gitRemote = null,
         [Description("Optional origin note for the update.")]
         string? origem = null,
+        [Description("Optional non-minimal preferred links as 'type:target' (example: uses_backend:projects/Acme.X.Api). Omit to preserve existing; pass the full desired list to replace; pass [] to clear all intentionally. Do not pass documents or belongs_to_domain.")]
+        IReadOnlyList<string>? linksSemanticos = null,
         CancellationToken cancellationToken = default)
     {
         var startedTimestamp = Stopwatch.GetTimestamp();
@@ -358,7 +366,8 @@ public sealed class NeroKnowledgeTools(
                     GitBranch = gitBranch,
                     GitHead = gitHead,
                     GitRemote = gitRemote,
-                    Origin = origem
+                    Origin = origem,
+                    SemanticLinks = ProjectSemanticLinkMerger.ParseToolInput(linksSemanticos)
                 },
                 cancellationToken);
 

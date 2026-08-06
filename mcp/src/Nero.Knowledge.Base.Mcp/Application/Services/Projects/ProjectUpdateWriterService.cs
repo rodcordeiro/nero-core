@@ -37,13 +37,14 @@ public sealed class ProjectUpdateWriterService(
             knowledgeRootPath,
             request.Project,
             request.Domain,
+            request.SemanticLinks,
             fileKind: "index",
             fileName: "index.md",
             requireExistingTarget: true,
-            markdownFactory: () =>
+            markdownFactory: (project, domain, semanticLinks) =>
             {
                 ValidateIndexRequest(request);
-                return RenderIndexMarkdown(request);
+                return RenderIndexMarkdown(request, project, domain, semanticLinks);
             },
             cancellationToken);
 
@@ -55,13 +56,14 @@ public sealed class ProjectUpdateWriterService(
             knowledgeRootPath,
             request.Project,
             request.Domain,
+            request.SemanticLinks,
             fileKind: "context",
             fileName: "context.md",
             requireExistingTarget: true,
-            markdownFactory: () =>
+            markdownFactory: (project, domain, semanticLinks) =>
             {
                 ValidateContextRequest(request);
-                return RenderContextMarkdown(request);
+                return RenderContextMarkdown(request, project, domain, semanticLinks);
             },
             cancellationToken);
 
@@ -73,13 +75,14 @@ public sealed class ProjectUpdateWriterService(
             knowledgeRootPath,
             request.Project,
             request.Domain,
+            request.SemanticLinks,
             fileKind: "inventory",
             fileName: "inventory.md",
             requireExistingTarget: false,
-            markdownFactory: () =>
+            markdownFactory: (project, domain, semanticLinks) =>
             {
                 ValidateInventoryRequest(request);
-                return RenderInventoryMarkdown(request);
+                return RenderInventoryMarkdown(request, project, domain, semanticLinks);
             },
             cancellationToken);
 
@@ -87,10 +90,11 @@ public sealed class ProjectUpdateWriterService(
         string knowledgeRootPath,
         string projectRaw,
         string domainRaw,
+        IReadOnlyList<ProjectSemanticLink>? semanticLinks,
         string fileKind,
         string fileName,
         bool requireExistingTarget,
-        Func<string> markdownFactory,
+        Func<string, string, IReadOnlyList<ProjectSemanticLink>, string> markdownFactory,
         CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(knowledgeRootPath);
@@ -120,7 +124,13 @@ public sealed class ProjectUpdateWriterService(
                 $"Project '{project}' is missing {fileName}. Bootstrap with nero_register_project (index/context) before updating.");
         }
 
-        var markdown = markdownFactory();
+        var effectiveLinks = ProjectSemanticLinkMerger.Resolve(
+            rootPath,
+            existed ? targetLocation.FullPath : null,
+            project,
+            semanticLinks);
+
+        var markdown = markdownFactory(project, domain, effectiveLinks);
         await KnowledgeMarkdownFileWriter.WriteReplaceAsync(targetLocation.FullPath, markdown, cancellationToken);
 
         return new UpdateProjectFileResult
@@ -246,10 +256,14 @@ public sealed class ProjectUpdateWriterService(
         }
     }
 
-    private static string RenderIndexMarkdown(UpdateProjectIndexRequest request)
+    private static string RenderIndexMarkdown(
+        UpdateProjectIndexRequest request,
+        string project,
+        string domain,
+        IReadOnlyList<ProjectSemanticLink> semanticLinks)
     {
-        var project = EscapeYaml(request.Project.Trim());
-        var domain = EscapeYaml(request.Domain.Trim().ToLowerInvariant());
+        var projectEscaped = EscapeYaml(project);
+        var domainEscaped = EscapeYaml(domain);
         var arquivos = string.Join(
             Environment.NewLine,
             request.Arquivos.Select(item => $"- `{item.Trim().Trim('`')}`"));
@@ -261,21 +275,18 @@ public sealed class ProjectUpdateWriterService(
 
             {request.Origin.Trim()}
             """;
+        var linksBlock = RenderLinksBlock(projectEscaped, domainEscaped, semanticLinks);
 
         return $$"""
             ---
             type: project_index
             scope: project
-            project: {{project}}
+            project: {{projectEscaped}}
             data_class: {{ComplianceFrontmatter.DefaultDataClass}}
-            links:
-              - type: documents
-                target: projects/{{project}}
-              - type: belongs_to_domain
-                target: domains/{{domain}}
+            {{linksBlock}}
             ---
 
-            # {{request.Project.Trim()}}
+            # {{project}}
 
             {{request.Purpose.Trim()}}
 
@@ -285,10 +296,14 @@ public sealed class ProjectUpdateWriterService(
             """;
     }
 
-    private static string RenderContextMarkdown(UpdateProjectContextRequest request)
+    private static string RenderContextMarkdown(
+        UpdateProjectContextRequest request,
+        string project,
+        string domain,
+        IReadOnlyList<ProjectSemanticLink> semanticLinks)
     {
-        var project = EscapeYaml(request.Project.Trim());
-        var domain = EscapeYaml(request.Domain.Trim().ToLowerInvariant());
+        var projectEscaped = EscapeYaml(project);
+        var domainEscaped = EscapeYaml(domain);
         var updatedAt = DateOnly.FromDateTime(DateTime.UtcNow).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
         var skillBlock = string.IsNullOrWhiteSpace(request.SkillOperacional)
             ? string.Empty
@@ -306,21 +321,18 @@ public sealed class ProjectUpdateWriterService(
 
             {request.Origin.Trim()}
             """;
+        var linksBlock = RenderLinksBlock(projectEscaped, domainEscaped, semanticLinks);
 
         return $$"""
             ---
             type: project_context
             scope: project
-            project: {{project}}
+            project: {{projectEscaped}}
             data_class: {{ComplianceFrontmatter.DefaultDataClass}}
-            links:
-              - type: documents
-                target: projects/{{project}}
-              - type: belongs_to_domain
-                target: domains/{{domain}}
+            {{linksBlock}}
             ---
 
-            # {{request.Project.Trim()}}
+            # {{project}}
 
             Atualizado em: {{updatedAt}}
 
@@ -330,7 +342,7 @@ public sealed class ProjectUpdateWriterService(
 
             ## Dominio
 
-            {{request.Domain.Trim().ToLowerInvariant()}}
+            {{domain}}
 
             ## Stack
 
@@ -346,10 +358,14 @@ public sealed class ProjectUpdateWriterService(
             """;
     }
 
-    private static string RenderInventoryMarkdown(UpdateProjectInventoryRequest request)
+    private static string RenderInventoryMarkdown(
+        UpdateProjectInventoryRequest request,
+        string project,
+        string domain,
+        IReadOnlyList<ProjectSemanticLink> semanticLinks)
     {
-        var project = EscapeYaml(request.Project.Trim());
-        var domain = EscapeYaml(request.Domain.Trim().ToLowerInvariant());
+        var projectEscaped = EscapeYaml(project);
+        var domainEscaped = EscapeYaml(domain);
         var reviewedAt = request.ReviewedAt.Trim();
         var sinais = string.Join(
             Environment.NewLine,
@@ -384,22 +400,19 @@ public sealed class ProjectUpdateWriterService(
 
             {request.Origin.Trim()}
             """;
+        var linksBlock = RenderLinksBlock(projectEscaped, domainEscaped, semanticLinks);
 
         return $$"""
             ---
             type: project_inventory
             scope: project
-            project: {{project}}
+            project: {{projectEscaped}}
             data_class: {{ComplianceFrontmatter.DefaultDataClass}}
             reviewed_at: "{{reviewedAt}}"
-            links:
-              - type: documents
-                target: projects/{{project}}
-              - type: belongs_to_domain
-                target: domains/{{domain}}
+            {{linksBlock}}
             ---
 
-            # Inventario local - {{request.Project.Trim()}}
+            # Inventario local - {{project}}
 
             ## Estado Git (review {{reviewedAt}})
 
@@ -413,6 +426,28 @@ public sealed class ProjectUpdateWriterService(
 
             {{sinais}}{{originBlock}}
             """;
+    }
+
+    private static string RenderLinksBlock(
+        string projectEscaped,
+        string domainEscaped,
+        IReadOnlyList<ProjectSemanticLink> semanticLinks)
+    {
+        var builder = new StringBuilder();
+        builder.AppendLine("links:");
+        builder.AppendLine("  - type: documents");
+        builder.AppendLine($"    target: projects/{projectEscaped}");
+        builder.AppendLine("  - type: belongs_to_domain");
+        builder.Append($"    target: domains/{domainEscaped}");
+
+        var extra = ProjectSemanticLinkMerger.RenderYamlBlock(semanticLinks, EscapeYaml);
+        if (!string.IsNullOrWhiteSpace(extra))
+        {
+            builder.AppendLine();
+            builder.Append(extra);
+        }
+
+        return builder.ToString().TrimEnd();
     }
 
     private static void RequireBounded(string? value, string parameterName, int maxLength)
