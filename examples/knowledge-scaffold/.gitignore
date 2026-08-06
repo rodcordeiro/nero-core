@@ -1,0 +1,5 @@
+# Local MCP index (never commit)
+.nero/
+*.db
+*.db-shm
+*.db-wal

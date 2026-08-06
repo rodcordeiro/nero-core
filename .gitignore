@@ -1,0 +1,15 @@
+﻿.DS_Store
+Thumbs.db
+
+# .NET
+bin/
+obj/
+*.user
+.vs/
+TestResults/
+*.DotSettings.user
+mcp/publish/
+mcp/data/
+*.db
+*.db-shm
+*.db-wal
