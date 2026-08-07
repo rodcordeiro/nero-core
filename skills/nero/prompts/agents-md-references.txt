@@ -6,7 +6,7 @@ Atualizar ou criar `AGENTS.md` no repositorio da aplicacao em checkout, deixando
 Parametros:
 - `<REPO_APP>`: caminho local do repositorio da aplicacao
 - `<NOME_DO_PROJETO>`: nome canonico no Knowledge Repo (se conhecido; ex.: `Acme.Api`)
-- `<DOMINIO>`: `api` | `front` | `mobile` | `integracoes` (inferir se nao informado)
+- `<DOMINIO>`: `api` | `front` | `mobile` | `integracoes` | `powershell` | `mcp` (inferir se nao informado)
 
 Premissas:
 - Nao alterar codigo de produto (controllers, services, screens, workers, DI, pipelines), salvo pedido explicito do usuario.
@@ -29,6 +29,8 @@ Premissas:
    - Next/React web → `front`
    - Expo/React Native → `mobile`
    - Hub/barramento/integracao central → `integracoes` (ou segundo dominio quando couber)
+   - Modulo PowerShell (`*.psd1`/`*.psm1`) ou colecao de scripts `.ps1`/`.bat`/`.cmd`/`.vbs` → `powershell`
+   - Servidor/cliente MCP (`@modelcontextprotocol/sdk`, .NET MCP host, tools/resources/prompts, `StdioServerTransport`, Streamable HTTP) → `mcp`
 2. Mapear entrypoint, stack, fronteiras e areas de risco sem editar codigo.
 3. Opcional (se MCP disponivel): `nero_get_project_context` / `nero_search_knowledge` para precedentes de docs de agentes no Knowledge Repo.
 
@@ -45,6 +47,8 @@ Apos classificar `<DOMINIO>`, **ler o guideline correspondente na skill `$nero`*
 | `integracoes` | `references/guidelines/api-guidelines.md` (heranca; anotar no AGENTS/index) |
 | `front` | `references/guidelines/front-guidelines.md` |
 | `mobile` | `references/guidelines/mobile-guidelines.md` |
+| `powershell` | `references/guidelines/powershell-guidelines.md` |
+| `mcp` | `references/guidelines/mcp-guidelines.md` |
 
 Regras de aplicacao:
 
@@ -76,6 +80,22 @@ Regras de aplicacao:
 - Paths do guideline sao layout Expo **esperado**; documentar o layout real e debitar gaps.
 - Garantir skills RN/Expo na secao de skills condicionais quando o checkout for mobile.
 <!-- /FRAGMENT:guideline-mobile -->
+
+### 1.1.d powershell
+
+<!-- FRAGMENT:guideline-powershell -->
+- Ler `references/guidelines/powershell-guidelines.md`.
+- Para modulos, priorizar manifesto (`*.psd1`), modulo raiz (`*.psm1`), funcoes publicas, helpers privados, exports, help e workflows de analise/publicacao.
+- Para colecoes de scripts, distinguir scripts ativos de referencias/legado/gerados e registrar riscos de operacoes que afetam maquina, rede, registro, servicos, tarefas agendadas, VPN, instaladores ou limpeza de disco.
+<!-- /FRAGMENT:guideline-powershell -->
+
+### 1.1.e mcp
+
+<!-- FRAGMENT:guideline-mcp -->
+- Ler `references/guidelines/mcp-guidelines.md`.
+- Para servidores MCP, priorizar entrypoint, transport, capabilities, tools/resources/prompts, schemas, configuracao, seguranca e comandos de validacao.
+- Para repositorios que apenas consomem MCP ou documentam workflows de knowledge via MCP, registrar como consumidor/knowledge workflow e nao declarar comportamento de servidor sem evidencia no checkout.
+<!-- /FRAGMENT:guideline-mcp -->
 <!-- /FRAGMENT:guidelines-por-dominio -->
 
 ---
@@ -146,6 +166,8 @@ Nao colar o texto do guideline no AGENTS — so o ponteiro + 1–3 regras locais
 | `integracoes` | `$nero` → `references/guidelines/api-guidelines.md` (heranca) |
 | `front` | `$nero` → `references/guidelines/front-guidelines.md` |
 | `mobile` | `$nero` → `references/guidelines/mobile-guidelines.md` |
+| `powershell` | `$nero` → `references/guidelines/powershell-guidelines.md` |
+| `mcp` | `$nero` → `references/guidelines/mcp-guidelines.md` |
 
 Sempre refletir o ponteiro no `AGENTS.md` e em `references/index.md`.
 
@@ -166,6 +188,8 @@ Acionar/documentar no AGENTS somente com evidencia no checkout:
 |---|---|
 | Lib/auth/UI kit interna do time (package/import comprovado) | Domain Skill local do time (fora do Nero) |
 | Projeto mobile RN/Expo | skills RN/Expo aplicaveis + `$nero` |
+| Modulo ou scripts PowerShell | `$nero` + `references/guidelines/powershell-guidelines.md` |
+| Servidor ou consumidor MCP | `$nero` + `references/guidelines/mcp-guidelines.md` |
 | Sem evidencia | omitir |
 
 Nao assumir skills de components/auth/hub embutidas no Nero — elas nao fazem parte do canônico.

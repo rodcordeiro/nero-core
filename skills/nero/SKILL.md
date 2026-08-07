@@ -14,7 +14,7 @@ Fonte canonica: Knowledge Repo apontado por `KnowledgeRoot__Path` (scaffold de e
 Prioridade:
 
 1. `knowledge/global/` — regras e decisoes de todo o ecossistema.
-2. `knowledge/domains/<dominio>/` — padroes por dominio (`api`, `front`, `mobile`, `integracoes`; novos via `nero_register_domain` quando justificado).
+2. `knowledge/domains/<dominio>/` — padroes por dominio (`api`, `front`, `mobile`, `integracoes`, `powershell`, `mcp`; novos via `nero_register_domain` quando justificado).
 3. `knowledge/projects/<projeto>/` — contexto do projeto atual.
 
 Conflito: prefira a camada mais especifica, exceto se contradisser regra global explicita.
@@ -54,7 +54,7 @@ Templates do Schema/scaffold so como fallback.
 | `references/compliance-security.md` | Checklist pos-register, anti-leak, commit/push |
 | `references/knowledge-routing.md` | Camada, promocao, `links:`, Dono, checklist grafo |
 | `references/git-merging.md` | Conflitos de merge no Knowledge Repo |
-| `references/guidelines/` | Estruturacao por dominio (`api`/`front`/`mobile`; `integracoes` herda api) |
+| `references/guidelines/` | Estruturacao por dominio (`api`/`front`/`mobile`/`powershell`/`mcp`; `integracoes` herda api) |
 | `references/domain-skills.md` | Como criar/usar Domain Skills **fora** do Nero |
 | `prompts/index.md` | Indice de playbooks |
 
