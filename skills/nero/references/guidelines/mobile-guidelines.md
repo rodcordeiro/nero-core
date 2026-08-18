@@ -1,8 +1,6 @@
 # Repository Guidelines — Mobile
 
-Fonte canônica na skill `$nero`: `references/guidelines/mobile-guidelines.md`.
-
-Paths e scripts abaixo são um **layout Expo típico / esperado**. Documente o checkout real em `structure.md` / `conventions.md`; se divergir deste alvo, registre débito de adequação em `tech-debt.md` — não reestruture código só por este playbook.
+Paths e scripts abaixo sao um **layout Expo tipico / esperado**. Documente o checkout real em `structure.md` / `conventions.md`; se divergir deste alvo, registre debito em `tech-debt.md`. Reestruturar codigo fica fora deste guideline. Aplique cada regra da secao que a tarefa tocar.
 
 ## Project Structure & Module Organization
 
@@ -23,10 +21,10 @@ Always use the skills `$vercel-react-native-skills` and `$react-native-best-prac
 - Keep business behavior in feature hooks under `src/screens/<Feature>/hooks/` (or the project's equivalent feature-hook location).
 - Keep screen entrypoints focused on UI composition.
 - Split complex screens into smaller components when UI states are clearly different, especially for camera, permission, review, and finalization flows.
-- Prefer Expo Router public APIs. Avoid internal package imports or deep framework paths.
+- Prefer Expo Router public APIs. Internal package imports and deep framework paths stay unused.
 - Treat camera, permission, barcode, and upload flows as sensitive UI states that should preserve behavior when refactoring.
-- Do not move feature logic into shared components unless the behavior is truly cross-cutting.
-- Maintain the existing mobile navigation and shell structure; do not flatten routes into generic screens.
+- Keep feature logic in the feature; shared components stay cross-cutting only.
+- Maintain the existing mobile navigation and shell structure; flatten routes into generic screens only with an explicit migration.
 - When changing screen structure, validate that loading, empty, denied-permission, and success states still render correctly on device.
 
 ## Build, Test, and Development Commands

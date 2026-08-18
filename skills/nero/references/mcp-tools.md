@@ -1,105 +1,37 @@
 # Tools MCP Nero.Knowledge.Base
 
-## Uso operacional
+Inputs, outputs e contratos por tool. Ordem do lote: `workflow.md`. Significado de `links:` e `Dono`: `knowledge-routing.md`. Pos-lote e anti-leak: `compliance-security.md`.
 
-Use o MCP como camada preferencial para busca, contexto consolidado, grafo, registro controlado e reindexacao **sob demanda** do Knowledge Repo (`KnowledgeRoot__Path`).
+## Indice
 
-Nao trate o MCP como unica fonte de verdade quando a tarefa depender do estado real do checkout local. Para inventario tecnico, rotas, DI, `.csproj`, migrations, contratos publicos, configuracoes, Dockerfile, pipelines, riscos operacionais e comportamento efetivo do codigo, valide os arquivos diretamente no repositorio.
-`nero_register_project` cria `index.md` / `context.md` apenas quando ausentes. Para **atualizar** index, context ou inventory use `nero_update_project_index`, `nero_update_project_context` e `nero_update_project_inventory` (Marco 21). Em `linksSemanticos`, omitir preserva nao-minimos; lista substitui; `[]` limpa (Marco 21 P3). Escrita livre de Markdown nesses arquivos fica reservada a casos em que o MCP estiver indisponivel.
+| Quando | Tool |
+|---|---|
+| Search / contexto / grafo | `nero_search_knowledge`, `nero_get_project_context`, `nero_get_domain_context`, `nero_find_related_knowledge` |
+| Projeto e dominio | `nero_register_project`, `nero_register_domain`, `nero_update_domain`, `nero_inactivate_domain`, `nero_update_project_index`, `nero_update_project_context`, `nero_update_project_inventory` |
+| Notas | `nero_register_pattern`, `nero_register_validation_rule`, `nero_register_snapshot`, `nero_register_troubleshooting`, `nero_register_business_rule`, `nero_register_decision`, `nero_link_knowledge` (business_rule/decision: schema no MCP; mesmo contrato de writer) |
+| Admin | `nero_admin_status`, `nero_admin_validate`, `nero_admin_compliance_scan`, `nero_admin_reindex`, `nero_admin_check_index_consistency`, `nero_admin_project_health`, `nero_admin_ecosystem_health` |
+| Git | `nero_admin_git_status`, `nero_admin_git_fetch`, `nero_admin_git_pull`, `nero_admin_create_commit`, `nero_admin_git_push` |
 
-Lifecycle de dominio: `nero_register_domain` / `nero_update_domain` / `nero_inactivate_domain` (Marco 22). Allowlist de dominio em `register_project` / `update_project_*` e descoberta no filesystem (`domains/*/index.md` com `status` ausente ou `active`). Domains inativos nao aceitam novos projects ate `nero_update_domain` com `reativar=true`.
+## Contrato dos writers
 
-**Compliance (Marco 23) + anti-leak (Marco 24):** writers (`nero_register_*`, `nero_update_*`, dominio/projeto, `nero_link_knowledge`) fazem scan **reject-only** — `Category: Compliance` + `Field` + `RuleId`, sem ecoar o valor e sem escrita. Placeholders exatos da allowlist passam; JWT/base64 com padding sempre bloqueiam. Use `nero_admin_compliance_scan` e exija `isValid` **e** `isCompliant` em `nero_admin_validate` antes de publicar. Quarentena: `compliance_status: quarantined` + `compliance_reason`.
+`nero_register_project` cria `index.md` / `context.md` so quando ausentes. Atualizar: `nero_update_project_index` / `nero_update_project_context` / `nero_update_project_inventory`. `linksSemanticos`: omitir preserva nao-minimos; lista substitui; `[]` limpa.
 
-**Leitura (Marco 24):** `nero_search_knowledge`, `get_*_context` e `find_related` mascaram spans com `[REDACTED:<ruleId>]` — Blocking sempre; Warning (`pii_suspect`) so se `data_class=restricted` (default/`internal` deixa warning em claro). Nao existe `include_unmasked`. Symlink/junction/reparse no path → `Category: Security` (fail-closed; indexer ignora o path sem ler conteudo). Em Compliance/Security: sanitizar e retentar; nunca contornar com escrita shell sob o Knowledge Repo.
+Dominio: `nero_register_domain` / `nero_update_domain` / `nero_inactivate_domain`. Allowlist = `domains/*/index.md` com `status` ausente ou `active`. Dominio inativo recusa projetos novos ate `nero_update_domain` com `reativar=true`.
 
-**Git via MCP (Marco 25):** preferir `nero_admin_git_status` / `nero_admin_git_fetch` / `nero_admin_git_pull` / `nero_admin_create_commit` / `nero_admin_git_push` para sincronizar knowledge. Gates: allowlist de paths sob o Knowledge Repo (e docs/data allowlisted pela config do MCP); `read_only` bloqueia pull/commit/push; commit exige index limpo + `paths[]` exatos + scan do diff staged (Blocking **ou** Warning); pull so `--ff-only` e worktree limpo (inclui untracked); push exige `confirm: true` + `confirmPhrase` exatamente `PUSH <remote> <branch>`; hard-deny de `--force` / `--force-with-lease` / `--no-verify` / `--no-gpg-sign` / amend / rebase; credenciais so via env/SSH. 
+Writers gravam Markdown. Sucesso inclui `recommendation` para concluir o **lote**. Reindex exclusivo e checklist: `compliance-security.md`. Scan reject-only e mascara de leitura: `compliance-security.md`. Git: secao `nero_admin_git_*`.
 
-Se o MCP retornar contexto que nao existe no filesystem, ou se o filesystem possuir notas que nao aparecem no indice, trate como desalinhamento entre SQLite e checkout. Rode validacao/reindex quando apropriado e confirme nos arquivos antes de concluir.
+## Campo da tool → `links:`
 
-Ao interpretar decisoes, considere relacoes `supersedes`: decisoes substituidas devem ser tratadas como historico, nao como orientacao vigente, salvo evidencia contraria.
+Significado das relacoes: `knowledge-routing.md`. Writers emitem so o vocabulario preferencial.
 
-## Contrato de escrita e reindex (cliente)
-
-As tools `nero_register_*` **apenas gravam Markdown**. Elas nao reindexam o SQLite e nao retornam search/grafo imediato.
-Todo retorno de sucesso inclui `recommendation` avisando que o indice pode estar stale e orientando concluir o lote antes de chamar `nero_admin_reindex` uma unica vez.
-
-O **cliente** (agente/humano) e responsavel por:
-
-1. Concluir o lote de escritas (`nero_register_*`, `nero_update_project_*` e/ou edicao manual em `knowledge/` se o MCP estiver indisponivel).
-2. Chamar `nero_admin_reindex` **uma vez** ao final do lote.
-3. Chamar `nero_admin_validate` antes de confiar no indice ou de commitar.
-4. (Opcional) `nero_admin_check_index_consistency` se houver suspeita de desalinhamento.
-
-Assim a reindexacao ocorre so quando as gravaÃ§Ãµes do lote terminaram, evitando N reindexes parciais e timeouts opacos no meio do register.
-Execute `nero_admin_reindex` de forma exclusiva: nao dispare reindex em paralelo com search, context, validate ou outra escrita SQLite.
-
-Fluxo recomendado MCP + filesystem:
-
-1. Consultar `nero_get_project_context` ou `nero_search_knowledge` para descobrir contexto e precedentes.
-2. Se o projeto nao existir, registrar a estrutura minima com `nero_register_project`.
-3. Evoluir `index.md` / `context.md` / `inventory.md` com `nero_update_project_index|context|inventory` quando o review exigir.
-4. Validar diretamente no repo os arquivos que sustentam a conclusao tecnica.
-5. Registrar conhecimento duravel com as tools de escrita (vocabulario preferencial em `links:`), em lote.
-6. Apos o lote, executar o checklist operacional abaixo.
-
-
-
-## Contrato de vocabulario de relacoes
-
-As tools `nero_register_*` emitem apenas o vocabulario preferencial em `links:` do frontmatter. O Markdown continua canonico; o SQLite deriva edges apenas quando o cliente roda `nero_admin_reindex`.
-
-Vocabulario preferencial (snake_case):
-
-
-| Relacao             | Uso tipico                                          |
-| ------------------- | --------------------------------------------------- |
-| `belongs_to_domain` | Projeto ou nota → dominio primario                  |
-| `documents`         | Nota documenta / contextualiza um alvo generico     |
-| `evidences`         | Snapshot/evidencia → nota concreta (nao hub)        |
-| `updates`           | Atualizacao evolutiva entre notas                   |
-| `depends_on`        | Dependencia; orientacao esperada consumer → backend |
-| `uses_backend`      | Front/Mobile → API/lib                              |
-| `related_decision`  | Ligacao semantica a uma decision                    |
-| `related_pattern`   | Ligacao semantica a um pattern                      |
-| `source_for`        | Pattern/fonte → consumidores (`usadoPor`)           |
-
-
-Relacao especial (fora da lista preferencial, allowlist estreita):
-
-- `supersedes` — **somente decision→decision**. Nao colapsar em `updates`. O split `activeDecisions` / `supersededDecisions` de `nero_get_project_context` depende dela.
-
-Tipos legados / nao preferenciais (rejeitados por `nero_admin_validate`): `relates_to`, `caused_by`, `used_by`, `candidate_for_reuse`, e qualquer outro fora do vocabulario preferencial (exceto `supersedes` decision→decision).
-
-Mapeamentos das tools de escrita (nao emitem legado):
-
-- `nero_register_snapshot.relacionadoA` → `documents` (nunca `relates_to`); `evidenciaDe` → `evidences` (rejeita hubs no register).
+- `nero_register_snapshot.relacionadoA` → `documents`; `evidenciaDe` → `evidences` (hubs rejeitados).
 - `nero_register_troubleshooting.causadoPor` → `related_decision` ou `documents`; `relacionadoA` → `related_pattern` / `related_decision` / `documents`.
 - `nero_register_pattern.usadoPor` → `source_for`; `candidatoParaReuso` → `documents` / `related_pattern` / `related_decision`.
-- `nero_register_decision.supersedes` → `supersedes` (decision-only; nao remapeia para `updates`).
-- `nero_register_business_rule`, `nero_register_validation_rule` e `nero_register_decision` sempre emitem `links:` minimos por escopo: `documents` (+ `belongs_to_domain` quando ha dominio). Decision ainda acrescenta `supersedes` quando informado.
-- `nero_register_decision` deixa `- Dono:` vazio. Apos o register, o cliente preenche `Dono` com o autor humano do commit que implementou a decisao (nome sem e-mail; nunca Cursor/Codex/agente). Ver `references/knowledge-routing.md`.
+- `nero_register_decision.supersedes` → `supersedes` (so decision→decision).
+- `nero_register_business_rule`, `nero_register_validation_rule` e `nero_register_decision` emitem `documents` (+ `belongs_to_domain` se houver dominio). Decision acrescenta `supersedes` quando informado.
+- `nero_register_decision` deixa `Dono` vazio — preencha apos o register (`knowledge-routing.md`).
 
-Regras semanticas aplicadas por `nero_admin_validate`:
-
-1. Rejeitar tipos legados / nao preferenciais.
-2. Rejeitar notas de conteudo sem `links:` nao vazio (decisions, patterns, business-rules, troubleshooting, snapshots, validation-and-tests).
-3. Rejeitar `supersedes` fora de decision→decision.
-4. Rejeitar `depends_on` / `uses_backend` invertidos (API/backend/lib → Front/Mobile); preferir consumer → backend.
-5. Rejeitar `evidences` apontando para hubs/diretorios genericos (`domains/*/patterns`, `projects/*/decisions`, `index`, `context`, etc.); exigir slug de nota concreta. Writers (`evidenciaDe` no register) aplicam a mesma rejeicao antes de gravar Markdown.
-
-
-
-## Checklist operacional apos escritas
-
-Apos qualquer lote de edicao no Knowledge Repo (uma ou varias notas; MCP ou filesystem):
-
-1. `nero_admin_reindex` — reconstruir o indice SQLite a partir dos Markdown (**obrigatorio; responsabilidade do cliente**; writers nao reindexam).
-2. `nero_admin_validate` — validar estrutura + semantica do vocabulario (`isValid` deve ser `true` antes de commitar knowledge).
-3. (Opcional) `nero_admin_check_index_consistency` — quando houver suspeita de desalinhamento MCP ↔ filesystem; inspecionar `elapsedMilliseconds` / `exceededThreshold` se a checagem degradar.
-
-Nao pule o passo 2 apos reindex: validate e o guardiao semantico do grafo.
-Nao confie em `nero_search_knowledge` / `nero_find_related_knowledge` / `nero_get_*_context` para notas acabadas de gravar antes do passo 1.
+`nero_admin_validate` rejeita legado, nota de conteudo sem `links:`, `supersedes` fora de decision→decision, `depends_on`/`uses_backend` invertidos e `evidences` para hub.
 
 ## Erros das tools de escrita
 
@@ -124,22 +56,6 @@ Exemplo compliance (reject-only; `MarkdownWritten: false`):
 ```text
 Tool 'nero_register_business_rule' failed. Category: Compliance. Field: rule. RuleId: secret.bearer_token. Reason: Compliance rule 'secret.bearer_token' blocked the write. ... MarkdownWritten: false. WrittenPaths: none. Recommendation: Remove the sensitive value or replace it with an exact allowlisted placeholder...
 ```
-
-
-
-### Compliance (Marco 23)
-
-- Writers (`nero_register_*`, `nero_update_*`, dominio/projeto, `nero_link_knowledge`) fazem scan **reject-only** antes de gravar:
-- P0 bloqueia secrets de alta precisao e PII verificavel (CPF/CNPJ com checksum, cartao Luhn).
-- Placeholders **exatos** permitidos: `<token>`, `REDACTED`, `*`**, `YOUR_API_KEY`, etc. (lista em `ComplianceTaxonomy`).
-- JWT / private key / blob base64-like **sempre** bloqueiam, mesmo ao lado de "example".
-- Campos longos: teto UTF-8 **64 KiB** → `InvalidInput` (nao Compliance).
-- Frontmatter novo inclui `data_class: internal` por default (`public|internal|restricted`).
-- Snapshots incluem secao **Retencao** (revisar 180d / arquivar 365d — recomendacao, sem exclusao automatica).
-- Quarentena humana: `compliance_status: quarantined` + `compliance_reason` — fora de search/context apos reindex; ainda aparece em `nero_admin_compliance_scan.quarantinedHits`.
-- Prontidao: `nero_admin_validate` exige `isValid` **e** `isCompliant`.
-
-Resposta a `Category: Compliance`: remova o valor real ou troque por placeholder da allowlist; nao tente redigir via MCP (fora do Marco 23/24).
 
 ## `nero_search_knowledge`
 
@@ -263,7 +179,7 @@ Output:
 `decisions` e mantido por compatibilidade, mas omite decisoes superseded e portanto acompanha as decisoes vigentes recentes. Agentes devem preferir `activeDecisions` como contrato explicito de orientacao vigente e tratar `supersededDecisions` como historico, observando `supersededBy` para saber qual decisao substituiu a antiga. `hasSupersededDecisions` e `recommendation` tornam essa distincao explicita.
 Uma decision do projeto e considerada superseded quando for alvo de uma edge `supersedes` decision→decision, mesmo que a decision substituta esteja em escopo global, de dominio ou de outro projeto; `supersededBy` retorna essa decision cross-scope.
 
-Expandir esse tratamento para `nero_search_knowledge` e `nero_find_related_knowledge` permanece fora do escopo do Marco 20.
+`nero_search_knowledge` e `nero_find_related_knowledge` nao aplicam o split vigente/historico: filtrem `supersedes` no cliente ou use `nero_get_project_context`.
 
 ## `nero_register_project`
 
@@ -331,7 +247,7 @@ Soft-delete: grava `status: inactive` no `index.md` (pasta permanece). Sempre ex
 
 Reescreve `projects/<Projeto>/index.md` a partir de campos estruturados (template hibrido). **Exige** `index.md` existente; bootstrap so via `nero_register_project`. **Nao reindexa**.
 
-**Contrato de** `linksSemanticos` **(Marco 21 P3 — evita clobber de grafo):**
+**Contrato de** `linksSemanticos` **(preserva grafo):**
 
 | Input | Efeito |
 | --- | --- |
@@ -802,7 +718,7 @@ Campos de performance (sempre presentes no output):
 | `exceededThreshold`     | `true` quando `elapsedMilliseconds > thresholdMilliseconds` — **nao falha** a tool; apenas sinaliza degradacao                                       |
 
 
-Referencia operacional (Marco 18): baseline tipica ~170–230 ms na arvore atual; stretch UX ≤2 s; hard SLO ≤60 s (abaixo do timeout MCP).
+Baseline tipica ~170–230 ms; stretch UX ≤2 s; hard SLO ≤60 s (abaixo do timeout MCP).
 
 Input: nenhum.
 
@@ -935,7 +851,7 @@ Quando `projectsWithIssuesCount > 0`:
 
 1. Priorize issues `MissingRecentSnapshot` e `StaleSnapshot` — a `recommendation` do issue aponta `skills/nero/prompts/knowledge-review-app-mcp.txt`; carregue o playbook e rode um review por projeto.
 2. Em seguida trate gaps estruturais (`MissingIndex`, `MissingContext`, `MissingBelongsToDomain`, `ProjectNotIndexed`, etc.).
-3. DomÃ­nios em `domainsWithIssues` costumam ser estruturais; corrija `index.md` / reindex antes de promover notas de dominio.
+3. Dominios em `domainsWithIssues` costumam ser estruturais; corrija `index.md` / reindex antes de promover notas de dominio.
 
 
 
