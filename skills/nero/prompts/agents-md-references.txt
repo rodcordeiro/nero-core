@@ -8,40 +8,44 @@ Parametros:
 - `<NOME_DO_PROJETO>`: nome canonico no Knowledge Repo (se conhecido; ex.: `Acme.Api`)
 - `<DOMINIO>`: `api` | `front` | `mobile` | `integracoes` | `powershell` | `mcp` (inferir se nao informado)
 
-Premissas:
-- Nao alterar codigo de produto (controllers, services, screens, workers, DI, pipelines), salvo pedido explicito do usuario.
-- `AGENTS.md` e indice operacional para agentes: identidade + roteamento + regras rapidas.
-- Detalhes vao para `.agents/references/` em arquivos curtos, uma responsabilidade por arquivo.
-- Preferir ler so o arquivo da tarefa; evitar monolitico.
-- Validar no filesystem o estado real do repo antes de escrever (README, entrypoint, estrutura, docs existentes).
-- Nao inventar regra de negocio; sem evidencia, omitir ou marcar como hipotese.
-- Nunca registrar secrets, tokens, cookies, Authorization, URLs sensiveis, payloads sensiveis ou valores reais de ambiente.
-- Se ja existir `AGENTS.md` / `.agents/`, refatorar e deduplicar; nao clonar conteudo.
-- Guidelines de dominio vivem na skill `$nero` (`references/guidelines/`); nao copiar o texto integral para o repo da app — so aplicar e apontar.
-- Domain Skills de produto/lib ficam fora do Nero; ver `references/domain-skills.md`.
+Guardrails:
+- Escopo: so `AGENTS.md` e `.agents/references/` (codigo de produto so com pedido explicito).
+- `AGENTS.md` e indice: identidade + roteamento + regras rapidas. Detalhe vive num arquivo de uma responsabilidade.
+- Checkout vence: validar README, entrypoint, estrutura e docs no filesystem antes de escrever; README desatualizado cede ao codigo.
+- Registrar so o comprovado; sem evidencia, omitir ou marcar hipotese.
+- Secrets, tokens, cookies, Authorization, URLs/payloads sensiveis e valores reais de ambiente ficam fora de docs e notes.
+- Se ja existir `AGENTS.md` / `.agents/`, refatorar e deduplicar.
+- Guidelines de dominio: ler em `$nero` → `references/guidelines/`; no app, so ponteiro + 1–3 regras locais do checkout.
+- Domain Skills de produto/lib: fora do Nero; `references/domain-skills.md`.
+- Arquivos enxutos: listas e tabelas. Distinguir caminho ativo vs helper/legado.
+- `structure.md` lista so o que existe no checkout (pastas do guideline ausentes viram debito, nao arvore inventada).
 
 ---
 
 ## 1) Classificar o projeto
 
-1. Inferir dominio primario a partir do nome/stack/estrutura:
-   - API .NET / Nest / similar → `api`
-   - Next/React web → `front`
-   - Expo/React Native → `mobile`
-   - Hub/barramento/integracao central → `integracoes` (ou segundo dominio quando couber)
-   - Modulo PowerShell (`*.psd1`/`*.psm1`) ou colecao de scripts `.ps1`/`.bat`/`.cmd`/`.vbs` → `powershell`
-   - Servidor/cliente MCP (`@modelcontextprotocol/sdk`, .NET MCP host, tools/resources/prompts, `StdioServerTransport`, Streamable HTTP) → `mcp`
-2. Mapear entrypoint, stack, fronteiras e areas de risco sem editar codigo.
-3. Opcional (se MCP disponivel): `nero_get_project_context` / `nero_search_knowledge` para precedentes de docs de agentes no Knowledge Repo.
+Done when: `<DOMINIO>` escolhido, entrypoint/stack nomeados, e a evidencia (path ou arquivo) citada.
+
+Inferir dominio primario a partir do nome/stack/estrutura:
+
+| Evidencia | Dominio |
+|---|---|
+| API .NET / Nest / similar | `api` |
+| Next/React web | `front` |
+| Expo/React Native | `mobile` |
+| Hub/barramento/integracao central | `integracoes` (ou segundo dominio quando couber) |
+| Modulo PowerShell (`*.psd1`/`*.psm1`) ou scripts `.ps1`/`.bat`/`.cmd`/`.vbs` | `powershell` |
+| Servidor/cliente MCP (SDK, host .NET, tools/resources/prompts, stdio/HTTP) | `mcp` |
+
+Mapear entrypoint, stack, fronteiras e areas de risco. Opcional (MCP): `nero_get_project_context` / `nero_search_knowledge` para precedentes de docs de agentes.
 
 ---
 
-<!-- FRAGMENT:guidelines-por-dominio (extrair para prompts/fragments/ quando crescer) -->
-## 1.1) Guidelines por dominio (obrigatorio)
+## 2) Aplicar o guideline do dominio
 
-Apos classificar `<DOMINIO>`, **ler o guideline correspondente na skill `$nero`** antes de montar a estrutura alvo e o conteudo de `structure.md` / `conventions.md` / `tech-debt.md`.
+Done when: o guideline foi lido; o ponteiro esta no plano de AGENTS/index; gaps vs checkout estao em `tech-debt.md` ou explicitamente ausentes.
 
-| Dominio | Guideline (path interno da skill `$nero`) |
+| Dominio | Guideline (`$nero`) |
 |---|---|
 | `api` | `references/guidelines/api-guidelines.md` |
 | `integracoes` | `references/guidelines/api-guidelines.md` (heranca; anotar no AGENTS/index) |
@@ -50,178 +54,104 @@ Apos classificar `<DOMINIO>`, **ler o guideline correspondente na skill `$nero`*
 | `powershell` | `references/guidelines/powershell-guidelines.md` |
 | `mcp` | `references/guidelines/mcp-guidelines.md` |
 
-Regras de aplicacao:
+Aplicacao:
+1. O guideline orienta estrutura esperada, regras, comandos, estilo, testes e seguranca.
+2. `structure.md` / `conventions.md` descrevem o que existe no checkout.
+3. Divergencia vs alvo do guideline → item em `tech-debt.md`. Reestruturar codigo fica fora deste playbook.
+4. Ponteiro na tabela "Como usar este contexto" e em `references/index.md`: dominio X → `$nero` → `references/guidelines/<arquivo>`.
 
-1. **Ler e aplicar** — o guideline orienta estrutura esperada, regras de dominio, comandos tipicos, estilo, testes e seguranca.
-2. **Nao materializar** o guideline em `.agents/references/` do app (sem copiar o arquivo inteiro).
-3. **Checkout vence no factual** — `structure.md` e `conventions.md` descrevem o que existe no filesystem.
-4. **Divergencia = debito** — se a estrutura/comandos do checkout divergirem do guideline (alvo esperado), registrar em `tech-debt.md` item de adequacao estrutural (sem reestruturar codigo neste playbook).
-5. **Ponteiro no AGENTS** — incluir na tabela "Como usar este contexto" e em `references/index.md` uma linha do tipo: dominio X → ler guideline em `$nero` → `references/guidelines/<arquivo>`.
+Prioridade por dominio (alem de ler o guideline):
 
-### 1.1.a api / integracoes
-
-<!-- FRAGMENT:guideline-api -->
-- Ler `references/guidelines/api-guidelines.md`.
-- Em `integracoes`, declarar heranca explicita do guideline de API.
-- Priorizar fronteiras Controller/Service/Repository/DTO (ou equivalente Nest), contratos publicos e superficies sensiveis (migrations, jobs, consumers).
-<!-- /FRAGMENT:guideline-api -->
-
-### 1.1.b front
-
-<!-- FRAGMENT:guideline-front -->
-- Ler `references/guidelines/front-guidelines.md`.
-- Priorizar rotas/pages finas, hooks/services de feature, design system existente e estados loading/empty/error.
-<!-- /FRAGMENT:guideline-front -->
-
-### 1.1.c mobile
-
-<!-- FRAGMENT:guideline-mobile -->
-- Ler `references/guidelines/mobile-guidelines.md`.
-- Paths do guideline sao layout Expo **esperado**; documentar o layout real e debitar gaps.
-- Garantir skills RN/Expo na secao de skills condicionais quando o checkout for mobile.
-<!-- /FRAGMENT:guideline-mobile -->
-
-### 1.1.d powershell
-
-<!-- FRAGMENT:guideline-powershell -->
-- Ler `references/guidelines/powershell-guidelines.md`.
-- Para modulos, priorizar manifesto (`*.psd1`), modulo raiz (`*.psm1`), funcoes publicas, helpers privados, exports, help e workflows de analise/publicacao.
-- Para colecoes de scripts, distinguir scripts ativos de referencias/legado/gerados e registrar riscos de operacoes que afetam maquina, rede, registro, servicos, tarefas agendadas, VPN, instaladores ou limpeza de disco.
-<!-- /FRAGMENT:guideline-powershell -->
-
-### 1.1.e mcp
-
-<!-- FRAGMENT:guideline-mcp -->
-- Ler `references/guidelines/mcp-guidelines.md`.
-- Para servidores MCP, priorizar entrypoint, transport, capabilities, tools/resources/prompts, schemas, configuracao, seguranca e comandos de validacao.
-- Para repositorios que apenas consomem MCP ou documentam workflows de knowledge via MCP, registrar como consumidor/knowledge workflow e nao declarar comportamento de servidor sem evidencia no checkout.
-<!-- /FRAGMENT:guideline-mcp -->
-<!-- /FRAGMENT:guidelines-por-dominio -->
+| Dominio | Foco no checkout |
+|---|---|
+| `api` | Fronteiras Controller/Service/Repository/DTO (ou Nest), contratos publicos, migrations/jobs/consumers |
+| `integracoes` | Igual `api`, mais heranca explicita do guideline de API |
+| `front` | Rotas/pages finas, hooks/services de feature, design system existente, estados loading/empty/error |
+| `mobile` | Layout real vs Expo esperado no guideline; debitar gaps; skills RN/Expo na secao condicional |
+| `powershell` | Manifesto/modulo/exports/help; scripts ativos vs legado; riscos de maquina/rede/registro/servicos |
+| `mcp` | Entrypoint, transport, capabilities, schemas, config, seguranca; consumidor MCP: registrar como consumidor, sem comportamento de servidor sem evidencia |
 
 ---
 
-## 2) Estrutura alvo
+## 3) Estrutura alvo
 
-Adaptar ao tamanho do projeto. Minimo:
+Done when: a arvore escolhida existe no plano, cada arquivo tem uma responsabilidade, e pastas extras tem justificativa de volume.
+
+Minimo:
 
 ```text
 AGENTS.md
 .agents/references/
-  index.md
+  index.md              # quando ler o que, incluindo o ponteiro do guideline `$nero`
   structure.md          # pastas/modulos/camadas (factual do checkout)
   runtime.md            # boot, DI, pipeline, hosted services / app bootstrap
   domain.md             # areas de negocio / proposito
   conventions.md        # regras praticas de mudanca e teste
   patterns.md           # padroes locais observados
-  tech-debt.md          # divida e prioridades (inclui gaps vs guideline, se houver)
+  tech-debt.md          # divida e prioridades (inclui gaps vs guideline)
 ```
 
-Usar pastas quando houver volume ou multiplos fluxos:
+Pastas extras so com volume:
+- `flows/` se houver >1 fluxo operacional relevante
+- `screens/` (ou equivalente) em front/mobile com multiplas areas de UI
 
-```text
-.agents/references/
-  index.md
-  structure.md
-  runtime.md
-  domain.md
-  conventions.md
-  patterns.md
-  tech-debt.md
-  flows/
-    <flujo-a>.md
-    <flujo-b>.md
-  screens/                 # front/mobile com varias superficies
-    <area>.md
-```
-
-Regras de pastas:
-- Criar `flows/` so se houver >1 fluxo operacional relevante.
-- Criar `screens/` (ou equivalente) so em front/mobile com multiplas areas de UI.
-- Nao criar pasta/arquivo vazio “por simetria”.
-- `index.md` deve mapear “quando ler o que”, incluindo o ponteiro do guideline `$nero`.
+Arquivo ou pasta so existe com conteudo. `index.md` mapeia “quando ler o que”.
 
 ---
 
-## 3) Conteudo do AGENTS.md
+## 4) Conteudo do AGENTS.md
 
-Manter curto. Incluir apenas:
+Done when: o AGENTS cabe como indice (os 4 itens abaixo) e nenhum paragrafo duplica um reference.
 
+Incluir apenas:
 1. Identidade minima (nome, stack, arquitetura/estilo, entry).
-2. Tabela “Como usar este contexto” apontando para `.agents/references/` **e** para o guideline do dominio em `$nero` (`references/guidelines/...`).
+2. Tabela “Como usar este contexto” → `.agents/references/` **e** guideline `$nero`.
 3. Regras rapidas (mudancas localizadas, testes, comando de validacao do projeto).
-4. Skills condicionais (secao 4).
+4. Skills condicionais (secao 5).
 
-Nao repetir nos references o que ja esta no AGENTS, e vice-versa.
-Nao colar o texto do guideline no AGENTS — so o ponteiro + 1–3 regras locais derivadas do checkout.
+No AGENTS: ponteiro + 1–3 regras locais do checkout. Nos references: o detalhe que o indice nao carrega.
 
 ---
 
-## 4) Skills e guidelines condicionais (obrigatorio avaliar)
+## 5) Skills condicionais
 
-### 4.0 Mapa dominio → guideline (espelho de 1.1)
+Done when: cada skill no AGENTS tem evidencia no checkout, e cada skill sem evidencia foi omitida.
 
-| Dominio | Skill guideline path |
+Espelhar o ponteiro do guideline (secao 2) no `AGENTS.md` e em `references/index.md`.
+
+### Integracoes / hubs / messaging
+
+Se o repositorio for API ou hub (`dominio=api` ou `integracoes`, ou evidencia de consumer/producer — inbox, assinaturas, fila, topico/evento/entidade/versao):
+
+- Incluir no `AGENTS.md` (tabela e regras rapidas) e espelhar em `references/index.md` + `conventions.md` a Domain Skill do time **somente se existir e houver evidencia** (`references/domain-skills.md`).
+- A Domain Skill e a fonte operacional do produto; o AGENTS so aponta.
+
+Caso contrario: omitir.
+
+### Outras Domain Skills e skills de framework
+
+| Condicao no checkout | Skill |
 |---|---|
-| `api` | `$nero` → `references/guidelines/api-guidelines.md` |
-| `integracoes` | `$nero` → `references/guidelines/api-guidelines.md` (heranca) |
-| `front` | `$nero` → `references/guidelines/front-guidelines.md` |
-| `mobile` | `$nero` → `references/guidelines/mobile-guidelines.md` |
-| `powershell` | `$nero` → `references/guidelines/powershell-guidelines.md` |
-| `mcp` | `$nero` → `references/guidelines/mcp-guidelines.md` |
-
-Sempre refletir o ponteiro no `AGENTS.md` e em `references/index.md`.
-
-### 4.1 Integracoes / hubs / messaging
-
-Se o repositorio for API ou hub de integracao (`dominio=api` ou `integracoes`, ou evidencia de consumer/producer — inbox, assinaturas, fila, topico/evento/entidade/versao):
-
-- Incluir no `AGENTS.md` (tabela e regras rapidas) e espelhar em `references/index.md` + `conventions.md` a Domain Skill do time **somente se existir e houver evidencia** (ver `references/domain-skills.md`).
-- Nao expandir o fluxo do hub dentro do AGENTS; a Domain Skill e a fonte operacional do produto.
-
-Se o repo **nao** for API/hub e nao consumir/publicar mensagens: omitir a regra (nao forcar).
-
-### 4.2 Outras Domain Skills e skills de framework
-
-Acionar/documentar no AGENTS somente com evidencia no checkout:
-
-| Condicao | Skill |
-|---|---|
-| Lib/auth/UI kit interna do time (package/import comprovado) | Domain Skill local do time (fora do Nero) |
-| Projeto mobile RN/Expo | skills RN/Expo aplicaveis + `$nero` |
-| Modulo ou scripts PowerShell | `$nero` + `references/guidelines/powershell-guidelines.md` |
-| Servidor ou consumidor MCP | `$nero` + `references/guidelines/mcp-guidelines.md` |
-| Sem evidencia | omitir |
-
-Nao assumir skills de components/auth/hub embutidas no Nero — elas nao fazem parte do canônico.
+| Lib/auth/UI kit interna (package/import comprovado) | Domain Skill local do time (fora do Nero) |
+| Mobile RN/Expo | skills RN/Expo aplicaveis + `$nero` |
+| Modulo ou scripts PowerShell | `$nero` + guideline powershell |
+| Servidor ou consumidor MCP | `$nero` + guideline mcp |
 
 ---
 
-## 5) Qualidade e anti-padroes
+## 6) Knowledge (opcional)
 
-- Arquivos enxutos; preferir listas e tabelas a prosa longa.
-- Evidencia concreta (paths, comportamentos observados).
-- Remover duplicacoes e secoes historicas irrelevantes.
-- Distinguir caminho **ativo** vs helper/comentario/legado quando documentar workers/integracoes.
-- README desatualizado nao prevalece sobre o codigo.
-- Guideline da skill nao substitui o inventario do checkout; nao inventar pastas “do guideline” que nao existem.
+Done when: o padrao novo foi registrado no Knowledge Repo e `nero_admin_validate` esta `isValid`+`isCompliant`, ou a secao foi omitida porque nada era reutilizavel.
+
+Se o padrao de AGENTS/references for novo ou reutilizavel: registrar via MCP no fim do lote (`nero_register_pattern` / `nero_register_snapshot`; `project` local; `domain`/`global` so com evidencia de reuso). Depois o checklist em `references/workflow.md` e `references/compliance-security.md`. Contrato de campos/`links:`: `references/mcp-tools.md` e `references/knowledge-routing.md`.
 
 ---
 
-## 6) Knowledge (opcional, se houver aprendizado reutilizavel)
+## 7) Resumo final
 
-Se o padrao de AGENTS/references for novo ou evoluir de forma reutilizavel:
-
-1. Registrar via MCP (`nero_register_pattern` / `nero_register_snapshot`) no escopo adequado (`project` local; `domain`/`global` so com evidencia de reuso).
-2. Apos o lote: `nero_admin_reindex` → `nero_admin_validate` (`isValid=true` e `isCompliant=true`) → commit/push apenas do Knowledge Repo se houver alteracao.
-
-Nao e obrigatorio registrar knowledge em todo run deste playbook.
-
----
-
-## 7) Resumo final obrigatorio
+Done when: os 6 itens abaixo citam paths reais deste run (ou “omitido” com motivo).
 
 Informar:
-
 1. projeto, dominio e paths tocados;
 2. se criou ou refatorou AGENTS/references;
 3. estrutura de pastas escolhida e por que;
