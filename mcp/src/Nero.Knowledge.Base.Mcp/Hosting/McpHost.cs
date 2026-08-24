@@ -88,6 +88,7 @@ public static class McpHost
         builder.Services.AddSingleton<AdminGitService>();
         builder.Services.AddSingleton<AdminStatusService>();
         builder.Services.AddSingleton<AdminKnowledgeMaintenanceService>();
+        builder.Services.AddSingleton<AdminTrustAuditService>();
         builder.Services.AddSingleton<KnowledgeDatabaseConnectionFactory>();
         builder.Services.AddSingleton<KnowledgeMarkdownReader>();
         builder.Services.AddSingleton<BusinessRuleWriterService>();

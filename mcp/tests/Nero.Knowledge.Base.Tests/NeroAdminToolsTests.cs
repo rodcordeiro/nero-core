@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Nero.Knowledge.Base.Mcp.Application.Services.Admin;
 using Nero.Knowledge.Base.Mcp.Application.Services.Writing;
 using Nero.Knowledge.Base.Mcp.Infrastructure.Indexing;
@@ -65,6 +66,48 @@ public class NeroAdminToolsTests
         Assert.Single(result.DomainsWithIssues);
     }
 
+    [Fact]
+    public async Task TrustAudit_MapsReadOnlyReportWithExplicitReferenceDate()
+    {
+        var root = CreateTempKnowledgeRoot();
+        var snapshotDirectory = Path.Combine(root, "projects", "Acme.Api", "snapshots");
+        Directory.CreateDirectory(snapshotDirectory);
+        await File.WriteAllTextAsync(Path.Combine(snapshotDirectory, "2025-01-01-review.md"), """
+            ---
+            type: snapshot
+            scope: project
+            project: Acme.Api
+            origin: "Repository review"
+            verification_status: verified
+            ---
+            # Review
+            """);
+        var tools = CreateTools(root);
+        var before = CreateManifest(root);
+
+        var result = await tools.nero_admin_trust_audit("2026-08-24");
+        var repeated = await tools.nero_admin_trust_audit("2026-08-24");
+
+        Assert.Equal("2026-08-24", result.AsOfDate);
+        Assert.Equal(result.Issues.Count, result.IssueCount);
+        Assert.Contains(result.Issues, issue => issue.Type == "StaleSnapshot");
+        Assert.Contains("does not edit", result.Recommendation);
+        Assert.Equal(result.Issues, repeated.Issues);
+        Assert.Equal(before, CreateManifest(root));
+        Assert.False(Directory.Exists(Path.Combine(root, ".nero")));
+    }
+
+    [Fact]
+    public async Task TrustAudit_RejectsInvalidReferenceDateWithActionableFieldError()
+    {
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => CreateTools(CreateTempKnowledgeRoot()).nero_admin_trust_audit("24/08/2026"));
+
+        Assert.Contains("Field: asOfDate", exception.Message);
+        Assert.Contains("yyyy-MM-dd", exception.Message);
+        Assert.Contains("Recommendation", exception.Message);
+    }
+
     private static NeroAdminTools CreateTools(string root)
     {
         var databaseOptions = new KnowledgeDatabaseOptions
@@ -85,7 +128,8 @@ public class NeroAdminToolsTests
         return new NeroAdminTools(
             new AdminStatusService(databaseOptions, rootOptions, new KnowledgeWriteOptions(), gitCommandRunner),
             new AdminGitService(rootOptions, gitCommandRunner, new KnowledgeWriteOptions()),
-            maintenance);
+            maintenance,
+            new AdminTrustAuditService(rootOptions, new KnowledgeMarkdownReader(), new AdminProjectFreshnessOptions()));
     }
 
     private static string CreateTempKnowledgeRoot()
@@ -94,4 +138,10 @@ public class NeroAdminToolsTests
         Directory.CreateDirectory(path);
         return path;
     }
+
+    private static string[] CreateManifest(string root) => Directory
+        .EnumerateFiles(root, "*", SearchOption.AllDirectories)
+        .Order(StringComparer.OrdinalIgnoreCase)
+        .Select(path => $"{Path.GetRelativePath(root, path).Replace('\\', '/')}:{Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path)))}:{File.GetLastWriteTimeUtc(path).Ticks}")
+        .ToArray();
 }

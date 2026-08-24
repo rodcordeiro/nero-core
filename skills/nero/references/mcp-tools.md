@@ -9,7 +9,7 @@ Inputs, outputs e contratos por tool. Ordem do lote: `workflow.md`. Significado 
 | Search / contexto / grafo | `nero_search_knowledge`, `nero_get_project_context`, `nero_get_domain_context`, `nero_find_related_knowledge` |
 | Projeto e dominio | `nero_register_project`, `nero_register_domain`, `nero_update_domain`, `nero_inactivate_domain`, `nero_update_project_index`, `nero_update_project_context`, `nero_update_project_inventory` |
 | Notas | `nero_register_pattern`, `nero_register_validation_rule`, `nero_register_snapshot`, `nero_register_troubleshooting`, `nero_register_business_rule`, `nero_register_decision`, `nero_link_knowledge` (business_rule/decision: schema no MCP; mesmo contrato de writer) |
-| Admin | `nero_admin_status`, `nero_admin_validate`, `nero_admin_compliance_scan`, `nero_admin_reindex`, `nero_admin_check_index_consistency`, `nero_admin_project_health`, `nero_admin_ecosystem_health` |
+| Admin | `nero_admin_status`, `nero_admin_validate`, `nero_admin_compliance_scan`, `nero_admin_trust_audit`, `nero_admin_reindex`, `nero_admin_check_index_consistency`, `nero_admin_project_health`, `nero_admin_ecosystem_health` |
 | Git | `nero_admin_git_status`, `nero_admin_git_fetch`, `nero_admin_git_pull`, `nero_admin_create_commit`, `nero_admin_git_push` |
 
 ## Contrato dos writers
@@ -663,6 +663,28 @@ Output:
 ```
 
 Quando `isValid=false` ou `isCompliant=false`, `actionableGaps` agrega gaps estruturais e `compliance: ...` (trechos ja mascarados).
+
+## `nero_admin_trust_audit`
+
+Audita sinais de confianca diretamente no Markdown canonico, sem abrir ou alterar o indice SQLite e sem escrever, mover, arquivar ou promover notas.
+
+Input:
+
+```json
+{
+  "asOfDate": "2026-08-24"
+}
+```
+
+`asOfDate` e opcional (`yyyy-MM-dd`) e torna achados baseados em idade reproduziveis; sem ele, a tool usa a data UTC atual. O relatorio ordenado retorna `scannedFileCount`, `issueCount` e `issues` com `type`, path logico, motivo e recomendacao humana.
+
+Categorias estaveis:
+
+- `MissingSource`: nota que carrega claim sem `origin` ou `sources` nao vazio.
+- `NeverVerified`: somente quando `verification_status` declara `unverified` ou `never_verified`; ausencia do campo nao prova falta de verificacao.
+- `UnverifiableClaim`: somente quando `verification_status: unverifiable`.
+- `StaleSnapshot`: snapshot datado no filename com idade maior que `AdminProjectFreshness__RecentSnapshotDays` (90 por padrao).
+- `ArchiveCandidate`: snapshot com pelo menos 365 dias; e apenas sugestao de revisao manual.
 
 ## `nero_admin_compliance_scan`
 

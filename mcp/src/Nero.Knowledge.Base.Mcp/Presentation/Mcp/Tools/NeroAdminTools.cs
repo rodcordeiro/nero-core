@@ -12,8 +12,54 @@ public sealed class NeroAdminTools(
     AdminStatusService adminStatusService,
     AdminGitService adminGitService,
     AdminKnowledgeMaintenanceService adminKnowledgeMaintenanceService,
+    AdminTrustAuditService adminTrustAuditService,
     ILogger<NeroAdminTools>? logger = null)
 {
+    [McpServerTool]
+    [Description("Audits trust signals in the canonical Markdown corpus without writing files or changing the derived index. Reports missing sources, never-verified notes, unverifiable claims, stale snapshots and archive candidates.")]
+    public async Task<NeroAdminTrustAuditToolResult> nero_admin_trust_audit(
+        [Description("Optional ISO date (yyyy-MM-dd) used to make age-based findings reproducible. Defaults to the current UTC date.")]
+        string? asOfDate = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await ExecuteAdminAsync("nero_admin_trust_audit", async () =>
+        {
+            var auditDate = DateOnly.FromDateTime(DateTime.UtcNow);
+            if (!string.IsNullOrWhiteSpace(asOfDate)
+                && !DateOnly.TryParseExact(
+                    asOfDate,
+                    "yyyy-MM-dd",
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    System.Globalization.DateTimeStyles.None,
+                    out auditDate))
+            {
+                throw new ArgumentException(
+                    "Invalid asOfDate. Expected an ISO date in yyyy-MM-dd format. Recommendation: correct asOfDate and retry the read-only audit.",
+                    nameof(asOfDate));
+            }
+            var result = await adminTrustAuditService.AuditAsync(auditDate, cancellationToken);
+            var issues = result.Issues.Select(issue => new NeroAdminTrustAuditIssueToolResult
+            {
+                Type = issue.Type,
+                Path = issue.Path,
+                Reason = issue.Reason,
+                Recommendation = issue.Recommendation
+            }).ToArray();
+
+            return new NeroAdminTrustAuditToolResult
+            {
+                KnowledgeRootPath = result.KnowledgeRootPath,
+                AsOfDate = result.AsOfDate,
+                ScannedFileCount = result.ScannedFileCount,
+                IssueCount = issues.Length,
+                Issues = issues,
+                Recommendation = issues.Length == 0
+                    ? "No trust gaps found for the selected date."
+                    : "Review findings manually. This report does not edit, archive or promote knowledge."
+            };
+        });
+    }
+
     [McpServerTool]
     [Description("Returns local administrative status for the Nero knowledge MCP server, including git branch, modified files, SQLite index state and write mode.")]
     public async Task<NeroAdminStatusToolResult> nero_admin_status(CancellationToken cancellationToken = default)

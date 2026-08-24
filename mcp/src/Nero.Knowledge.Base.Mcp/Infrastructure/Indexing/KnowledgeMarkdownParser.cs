@@ -67,6 +67,7 @@ public sealed class KnowledgeMarkdownParser
         var links = new List<KnowledgeMarkdownLink>();
         string? currentLinkType = null;
         string? currentLinkTarget = null;
+        string? currentListKey = null;
         var readingLinks = false;
 
         foreach (var line in frontmatterText.Split('\n', StringSplitOptions.RemoveEmptyEntries))
@@ -74,6 +75,20 @@ public sealed class KnowledgeMarkdownParser
             if (line.StartsWith("links:", StringComparison.Ordinal))
             {
                 readingLinks = true;
+                currentListKey = null;
+                continue;
+            }
+
+            if (!readingLinks && currentListKey is not null && line.StartsWith("  - ", StringComparison.Ordinal))
+            {
+                var item = line[4..].Trim().Trim('"', '\'');
+                if (item.Length > 0)
+                {
+                    frontmatter[currentListKey] = string.IsNullOrWhiteSpace(frontmatter[currentListKey])
+                        ? item
+                        : $"{frontmatter[currentListKey]}\n{item}";
+                }
+
                 continue;
             }
 
@@ -113,6 +128,7 @@ public sealed class KnowledgeMarkdownParser
             if (key.Length > 0)
             {
                 frontmatter[key] = value;
+                currentListKey = value.Length == 0 ? key : null;
             }
         }
 

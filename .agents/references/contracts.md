@@ -40,6 +40,7 @@ Admin/readiness tools include:
 - `nero_admin_status`
 - `nero_admin_validate`
 - `nero_admin_compliance_scan`
+- `nero_admin_trust_audit`
 - `nero_admin_reindex`
 - `nero_admin_check_index_consistency`
 - `nero_admin_project_health`
@@ -54,6 +55,8 @@ Git admin tools include:
 - `nero_admin_git_push`
 
 Treat git admin contracts as high risk: preserve clean-worktree checks, allowlisted paths, compliance scanning, confirmation phrases and non-force behavior.
+
+`nero_admin_trust_audit` reads canonical Markdown directly and never writes or reindexes. Its optional `asOfDate` (`yyyy-MM-dd`) makes age-based findings reproducible. Category codes are stable: `MissingSource`, `NeverVerified`, `UnverifiableClaim`, `StaleSnapshot`, and `ArchiveCandidate`. Verification findings require explicit `verification_status`; absence alone is not proof that verification never happened.
 
 ## CLI surface
 
