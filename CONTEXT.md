@@ -36,6 +36,10 @@ _Avoid_: flexible layout, per-user structure, schema-in-knowledge-repo
 An optional skill about a specific product, library, or organization. Documented as an extension pattern in Nero; never shipped as content in the canonical Nero tree.
 _Avoid_: shipping auth/webhook/components product skills inside Nero
 
+**Pack**:
+An optional complementary product that uses Nero primitives and lives entirely outside Core: a skill, templates, and the user's own corpus, with an optional sidecar MCP. Core remains deliverable with zero Packs installed.
+_Avoid_: plugin inside Core, schema extension, role pack shipped in Nero, COG-style monolithic plugin
+
 **Corpus**:
 The set of domain Markdown documents (projects, decisions, business rules, snapshots, troubleshooting) inside a Knowledge Repo.
 _Avoid_: Kit, Core, README of Nero

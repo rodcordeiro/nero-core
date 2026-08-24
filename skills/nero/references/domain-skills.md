@@ -2,7 +2,7 @@
 
 Domain Skills são skills opcionais sobre produto, biblioteca ou organização específica. O Nero **documenta** o padrão de extensão; **não** inclui conteúdo de Domain Skills no repositório canônico.
 
-Ver ADR `docs/adr/0005-domain-skills-documented-only.md`.
+Ver ADR `docs/adr/0005-domain-skills-documented-only.md` e `docs/adr/0006-complementary-packs-core-independent.md`.
 
 ## Fronteira
 
@@ -11,6 +11,9 @@ Ver ADR `docs/adr/0005-domain-skills-documented-only.md`.
 | Core + Kit (`$nero`) | Repo Nero | workflow MCP, guidelines genéricos, playbooks |
 | Knowledge Repo | Repo separado (`KnowledgeRoot__Path`) | corpus Markdown (global/domains/projects) |
 | Domain Skill | Repo/skill do usuário ou time | auth lib interna, design system, webhook hub |
+| Pack | Fora do canônico (skill + templates + corpus do usuário) | People CRM, Content Factory |
+
+Um **Pack** é um produto complementar construído com o padrão Domain Skill. O Core não depende de Pack algum; Packs consomem primitivos do Nero quando existirem (Capture Zone, trust, promoção). Nunca publique Packs dentro de `skills/nero/` no canônico.
 
 Nunca publique Domain Skills dentro de `skills/nero/` no canônico. Não trate `skills/nero/knowledge/` como corpus de domínio.
 
