@@ -4,13 +4,13 @@ Inputs, outputs e contratos por tool. Ordem do lote: `workflow.md`. Significado 
 
 ## Indice
 
-| Quando | Tool |
-|---|---|
-| Search / contexto / grafo | `nero_search_knowledge`, `nero_get_project_context`, `nero_get_domain_context`, `nero_find_related_knowledge` |
-| Projeto e dominio | `nero_register_project`, `nero_register_domain`, `nero_update_domain`, `nero_inactivate_domain`, `nero_update_project_index`, `nero_update_project_context`, `nero_update_project_inventory` |
-| Notas | `nero_register_pattern`, `nero_register_validation_rule`, `nero_register_snapshot`, `nero_register_troubleshooting`, `nero_register_business_rule`, `nero_register_decision`, `nero_link_knowledge` (business_rule/decision: schema no MCP; mesmo contrato de writer) |
-| Admin | `nero_admin_status`, `nero_admin_validate`, `nero_admin_compliance_scan`, `nero_admin_trust_audit`, `nero_admin_reindex`, `nero_admin_check_index_consistency`, `nero_admin_project_health`, `nero_admin_ecosystem_health` |
-| Git | `nero_admin_git_status`, `nero_admin_git_fetch`, `nero_admin_git_pull`, `nero_admin_create_commit`, `nero_admin_git_push` |
+| Quando                    | Tool                                                                                                                                                                                                                                                                  |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Search / contexto / grafo | `nero_search_knowledge`, `nero_get_project_context`, `nero_get_domain_context`, `nero_find_related_knowledge`                                                                                                                                                         |
+| Projeto e dominio         | `nero_register_project`, `nero_register_domain`, `nero_update_domain`, `nero_inactivate_domain`, `nero_update_project_index`, `nero_update_project_context`, `nero_update_project_inventory`                                                                          |
+| Notas                     | `nero_register_pattern`, `nero_register_validation_rule`, `nero_register_snapshot`, `nero_register_troubleshooting`, `nero_register_business_rule`, `nero_register_decision`, `nero_link_knowledge` (business_rule/decision: schema no MCP; mesmo contrato de writer) |
+| Admin                     | `nero_admin_status`, `nero_admin_validate`, `nero_admin_compliance_scan`, `nero_admin_trust_audit`, `nero_admin_reindex`, `nero_admin_check_index_consistency`, `nero_admin_project_health`, `nero_admin_ecosystem_health`                                            |
+| Git                       | `nero_admin_git_status`, `nero_admin_git_fetch`, `nero_admin_git_pull`, `nero_admin_create_commit`, `nero_admin_git_push`                                                                                                                                             |
 
 ## Contrato dos writers
 
@@ -90,8 +90,6 @@ Output:
   }
 ]
 ```
-
-
 
 ## `nero_get_project_context`
 
@@ -229,13 +227,11 @@ Reescreve `domains/<dominio>/index.md` a partir de campos estruturados (`titulo`
 
 **Contrato de** `sourceFor` **(evita perda acidental de links):**
 
-
 | Input              | Efeito                                                     |
 | ------------------ | ---------------------------------------------------------- |
 | omitido / `null`   | **Preserva** os `source_for` ja existentes no `index.md`   |
 | lista explicita    | **Substitui** o conjunto (envie a lista completa desejada) |
 | `[]` (lista vazia) | **Remove todos** os `source_for` de proposito              |
-
 
 Para remover um projeto especifico, passe a lista completa **sem** esse item. Dominio inactive exige `reativar=true`. Nunca define `status: inactive` (use `nero_inactivate_domain`). **Nao reindexa**.
 
@@ -249,11 +245,11 @@ Reescreve `projects/<Projeto>/index.md` a partir de campos estruturados (templat
 
 **Contrato de** `linksSemanticos` **(preserva grafo):**
 
-| Input | Efeito |
-| --- | --- |
-| omitido / `null` | **Preserva** links nao-minimos ja existentes (`uses_backend`, `depends_on`, …) |
-| lista explicita | **Substitui** o conjunto (envie a lista completa desejada) |
-| `[]` (lista vazia) | **Remove todos** os nao-minimos de proposito |
+| Input              | Efeito                                                                         |
+| ------------------ | ------------------------------------------------------------------------------ |
+| omitido / `null`   | **Preserva** links nao-minimos ja existentes (`uses_backend`, `depends_on`, …) |
+| lista explicita    | **Substitui** o conjunto (envie a lista completa desejada)                     |
+| `[]` (lista vazia) | **Remove todos** os nao-minimos de proposito                                   |
 
 Links minimos (`documents`, `belongs_to_domain`) sempre sao derivados de `projeto` / `dominio` — nao passe esses tipos em `linksSemanticos`. Formato de cada item: `type:target` (ex.: `uses_backend:projects/Acme.X.Api`). Direcao G3 e aplicada (`uses_backend`/`depends_on` invertidos sao rejeitados). Nunca dependa so de `nero_link_knowledge` para durar (edge so no SQLite; reindex descarta se ausente no Markdown).
 
@@ -269,8 +265,6 @@ Input:
   "linksSemanticos": ["depends_on:projects/Acme.Ldap.Api"]
 }
 ```
-
-
 
 ## `nero_update_project_context`
 
@@ -292,8 +286,6 @@ Input:
   "origem": "Review de knowledge"
 }
 ```
-
-
 
 ## `nero_update_project_inventory`
 
@@ -329,8 +321,6 @@ Output (compartilhado pelas tres tools):
   "recommendation": "The Markdown was written, but the SQLite index may be stale. Finish the write batch, then run nero_admin_reindex once."
 }
 ```
-
-
 
 ## `nero_get_domain_context`
 
@@ -381,8 +371,6 @@ Output:
 }
 ```
 
-
-
 ## `nero_find_related_knowledge`
 
 Busca conhecimentos relacionados por grafo, combinando edges diretas, dominio comum e projetos irmaos.
@@ -420,8 +408,6 @@ Output:
 ]
 ```
 
-
-
 ## `nero_register_pattern`
 
 Registra um padrao reutilizavel em Markdown. **Nao reindexa**; o cliente chama `nero_admin_reindex` apos o lote de escritas.
@@ -458,8 +444,6 @@ Output:
 }
 ```
 
-
-
 ## `nero_register_validation_rule`
 
 Registra uma regra de validacao, teste ou criterio de aceite reutilizavel em Markdown. **Nao reindexa**; o cliente chama `nero_admin_reindex` apos o lote de escritas.
@@ -491,8 +475,6 @@ Output:
   "relativePath": "domains/api/validation-and-tests/validar-estoque-disponivel.md"
 }
 ```
-
-
 
 ## `nero_register_snapshot`
 
@@ -529,8 +511,6 @@ Output:
   "relativePath": "projects/Acme.Api/snapshots/2026-07-22-snapshot-de-rotas.md"
 }
 ```
-
-
 
 ## `nero_register_troubleshooting`
 
@@ -569,8 +549,6 @@ Output:
 }
 ```
 
-
-
 ## `nero_link_knowledge`
 
 Cria uma edge manual e idempotente entre dois nodes ja indexados no SQLite.
@@ -602,8 +580,6 @@ Output:
 }
 ```
 
-
-
 ## `nero_admin_status`
 
 Retorna o status administrativo local do MCP Nero, sem modificar arquivos ou executar sincronizacao Git.
@@ -626,8 +602,6 @@ Output:
   "writeMode": "direct"
 }
 ```
-
-
 
 ## `nero_admin_validate`
 
@@ -700,8 +674,8 @@ Use para triage humana apos o one-shot inicial e antes de publicar knowledge.
 ## `nero_admin_reindex`
 
 Reindexa os Markdown canonicos do Knowledge Repo no SQLite configurado.
-**Responsabilidade do cliente:** chamar uma vez apos concluir o lote de `nero_register_`* / `nero_update_project_*` / edicoes manuais. Writers nao reindexam automaticamente.
-Nao execute em paralelo com search, context, validate ou outras operacoes SQLite. O busy timeout e configuravel por `KnowledgeDatabase__BusyTimeoutMilliseconds` (default `5000`) e pooling fica habilitado por default.
+**Responsabilidade do cliente:** chamar uma vez apos concluir o lote de `nero_register_`_ / `nero*update_project*_`/ edicoes manuais. Writers nao reindexam automaticamente.
+Nao execute em paralelo com search, context, validate ou outras operacoes SQLite. O busy timeout e configuravel por`KnowledgeDatabase\_\_BusyTimeoutMilliseconds`(default`5000`) e pooling fica habilitado por default.
 
 Input: nenhum.
 
@@ -715,8 +689,6 @@ Output:
   "recommendation": "Run nero_admin_validate next before trusting the index or committing knowledge changes."
 }
 ```
-
-
 
 ## `nero_admin_check_index_consistency`
 
@@ -732,13 +704,11 @@ Detecta:
 
 Campos de performance (sempre presentes no output):
 
-
 | Campo                   | Significado                                                                                                                                          |
 | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `elapsedMilliseconds`   | Tempo de parede da checagem                                                                                                                          |
 | `thresholdMilliseconds` | Limiar soft de UX (default `2000`). Configuravel via `AdminIndexConsistency:ThresholdMilliseconds` ou `AdminIndexConsistency__ThresholdMilliseconds` |
 | `exceededThreshold`     | `true` quando `elapsedMilliseconds > thresholdMilliseconds` — **nao falha** a tool; apenas sinaliza degradacao                                       |
-
 
 Baseline tipica ~170–230 ms; stretch UX ≤2 s; hard SLO ≤60 s (abaixo do timeout MCP).
 
@@ -768,8 +738,6 @@ Output:
   ]
 }
 ```
-
-
 
 ## `nero_admin_project_health`
 
@@ -875,8 +843,6 @@ Quando `projectsWithIssuesCount > 0`:
 2. Em seguida trate gaps estruturais (`MissingIndex`, `MissingContext`, `MissingBelongsToDomain`, `ProjectNotIndexed`, etc.).
 3. Dominios em `domainsWithIssues` costumam ser estruturais; corrija `index.md` / reindex antes de promover notas de dominio.
 
-
-
 ## `nero_admin_git_status`
 
 Retorna status Git read-only do repositorio que contem a knowledge root.
@@ -904,8 +870,6 @@ Output:
 }
 ```
 
-
-
 ## `nero_admin_git_fetch`
 
 Executa `git fetch --prune <remote>` no remote configurado e retorna o resultado sem fazer pull, merge ou checkout.
@@ -925,8 +889,6 @@ Output:
   "error": null
 }
 ```
-
-
 
 ## `nero_admin_git_pull`
 
@@ -958,8 +920,6 @@ Output:
 }
 ```
 
-
-
 ## `nero_admin_create_commit`
 
 Cria commit controlado para `paths[]` explicitos.
@@ -977,10 +937,7 @@ Input:
 ```json
 {
   "message": "docs: update knowledge backlog",
-  "paths": [
-    "docs/mcp-backlog.md",
-    "global/index.md"
-  ]
+  "paths": ["docs/mcp-backlog.md", "global/index.md"]
 }
 ```
 
@@ -991,10 +948,7 @@ Output:
   "success": true,
   "repositoryRoot": "C:/.../knowledge-repo",
   "commitSha": "abc123",
-  "paths": [
-    "docs/mcp-backlog.md",
-    "global/index.md"
-  ],
+  "paths": ["docs/mcp-backlog.md", "global/index.md"],
   "message": "Git commit created for allowlisted paths.",
   "output": null,
   "error": null
@@ -1002,8 +956,6 @@ Output:
 ```
 
 Em REJECT de compliance: sanitize o diff (placeholders da allowlist), unstage ja foi feito pela tool, e retente.
-
-
 
 ## `nero_admin_git_push`
 
@@ -1036,4 +988,3 @@ Output:
   "error": null
 }
 ```
-

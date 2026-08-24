@@ -6,12 +6,12 @@ Ver ADR `docs/adr/0005-domain-skills-documented-only.md` e `docs/adr/0006-comple
 
 ## Fronteira
 
-| Camada | Onde vive | Exemplo |
-|---|---|---|
-| Core + Kit (`$nero`) | Repo Nero | workflow MCP, guidelines genericos, playbooks |
-| Knowledge Repo | Repo separado (`KnowledgeRoot__Path`) | corpus Markdown (global/domains/projects) |
-| Domain Skill | Repo/skill do usuário ou time | auth lib interna, design system, webhook hub |
-| Pack | Fora do canônico (skill + templates + corpus do usuário) | People CRM, Content Factory |
+| Camada               | Onde vive                                                | Exemplo                                       |
+| -------------------- | -------------------------------------------------------- | --------------------------------------------- |
+| Core + Kit (`$nero`) | Repo Nero                                                | workflow MCP, guidelines genericos, playbooks |
+| Knowledge Repo       | Repo separado (`KnowledgeRoot__Path`)                    | corpus Markdown (global/domains/projects)     |
+| Domain Skill         | Repo/skill do usuário ou time                            | auth lib interna, design system, webhook hub  |
+| Pack                 | Fora do canônico (skill + templates + corpus do usuário) | People CRM, Content Factory                   |
 
 Um **Pack** é um produto complementar construído com o padrão Domain Skill. O Core não depende de Pack algum; Packs consomem primitivos do Nero quando existirem (Capture Zone, trust, promoção). Nunca publique Packs dentro de `skills/nero/` no canônico.
 
@@ -22,6 +22,7 @@ Domain Skills ficam fora de `skills/nero/`. Corpus de produto fica no Knowledge 
 Done when: a skill cobre uma lib/produto concreto, e o que e generico ja esta em `$nero` ou no Knowledge Repo.
 
 Crie quando:
+
 - a orientacao depende de lib, pacote ou produto concreto (API interna, UI kit, auth SDK);
 - o playbook `$nero` sozinho ficaria generico demais para ser acionavel;
 - o conhecimento muda com o produto, nao com o Schema Nero.
@@ -59,11 +60,11 @@ Done when: `$nero` rodou para health/contexto; a Domain Skill so entra se o chec
 
 No `AGENTS.md` da aplicacao, skills condicionais com evidencia (package.json, imports, solution):
 
-| Condicao | Skill |
-|---|---|
+| Condicao                           | Skill                             |
+| ---------------------------------- | --------------------------------- |
 | Checkout usa a lib de auth do time | `$acme-auth` (Domain Skill local) |
-| Mobile Expo/RN | skills RN/Expo + `$nero` |
-| Sem evidencia | omitir a Domain Skill |
+| Mobile Expo/RN                     | skills RN/Expo + `$nero`          |
+| Sem evidencia                      | omitir a Domain Skill             |
 
 ## Ligacao com Knowledge Repo
 

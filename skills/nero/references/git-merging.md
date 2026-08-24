@@ -21,6 +21,7 @@ Done when: o usuario escolheu a versao (ou a consolidacao), apos ver as duas reg
 Pergunte antes de escolher. Recencia, branch atual ou branch recebida nao decidem sozinhas — regra de negocio pode ser decisao externa ao codigo.
 
 Ao perguntar, informe:
+
 - quais regras estao em conflito;
 - onde cada uma aparece;
 - o impacto pratico de manter cada versao, quando for possivel inferir.

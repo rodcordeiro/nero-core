@@ -18,17 +18,17 @@ Done when: `nero_admin_project_health` (ou `ecosystem_health` na fila) rodou, o 
 
 Done when: `activeDecisions` vigentes (ou `context.md`) foram lidas, e precedente de dominio/irmaos/global foi buscado quando a tarefa pede regra, validacao, integracao ou incidente.
 
-6. `nero_get_project_context` — `activeDecisions` **vigentes**; `supersededDecisions` historico. Sem MCP: ler `context.md`.
-7. `nero_get_domain_context` quando a tarefa for de dominio. Sem MCP: ler o indice do dominio.
-8. `global/index.md` quando a tarefa for convencao ampla, seguranca, autenticacao, observabilidade ou pipeline.
-9. `nero_search_knowledge` e `nero_find_related_knowledge` (e `links:` nas notas) para precedente; projetos irmaos quando a regra for de negocio, validacao, integracao ou incidente.
+1. `nero_get_project_context` — `activeDecisions` **vigentes**; `supersededDecisions` historico. Sem MCP: ler `context.md`.
+2. `nero_get_domain_context` quando a tarefa for de dominio. Sem MCP: ler o indice do dominio.
+3. `global/index.md` quando a tarefa for convencao ampla, seguranca, autenticacao, observabilidade ou pipeline.
+4. `nero_search_knowledge` e `nero_find_related_knowledge` (e `links:` nas notas) para precedente; projetos irmaos quando a regra for de negocio, validacao, integracao ou incidente.
 
 ### Implementar e lote
 
 Done when: a mudanca de codigo (se houver) cita path no checkout, e o lote de knowledge — se houve escrita — passou o checklist em `compliance-security.md`.
 
-10. Implementar a menor mudanca verificavel. Codigo de produto: filesystem obrigatorio.
-11. Conhecimento reutilizavel: `nero_register_*` no fim, **serial**. Sem MCP: templates do Schema.
+ 1. Implementar a menor mudanca verificavel. Codigo de produto: filesystem obrigatorio.
+ 2. Conhecimento reutilizavel: `nero_register_*` no fim, **serial**. Sem MCP: templates do Schema.
 
 ## Hibrido MCP + checkout
 
