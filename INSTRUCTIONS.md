@@ -63,7 +63,7 @@ Na raiz do Nero:
 dotnet restore .\mcp\Nero.Knowledge.Base.sln
 dotnet test .\mcp\Nero.Knowledge.Base.sln
 dotnet build .\mcp\Nero.Knowledge.Base.sln -c Release --no-restore
-dotnet publish .\mcp\src\Nero.Knowledge.Base.Mcp\Nero.Knowledge.Base.Mcp.csproj -c Release --no-build -o .\mcp\publish\staged
+dotnet publish .\mcp\src\Nero.Knowledge.Base.Mcp\Nero.Knowledge.Base.Mcp.csproj -c Release --no-build -o .\mcp\publish\
 ```
 
 ## 6. Configurar o cliente MCP
@@ -92,7 +92,9 @@ KnowledgeDatabase__Path = "<KNOWLEDGE_REPO>\\.nero\\nero-knowledge.db"
   "mcpServers": {
     "nero-knowledge-base": {
       "command": "dotnet",
-      "args": ["<NERO_REPO>\\mcp\\publish\\staged\\Nero.Knowledge.Base.Mcp.dll"],
+      "args": [
+        "<NERO_REPO>\\mcp\\publish\\staged\\Nero.Knowledge.Base.Mcp.dll"
+      ],
       "env": {
         "KnowledgeRoot__Path": "<KNOWLEDGE_REPO>",
         "KnowledgeDatabase__Path": "<KNOWLEDGE_REPO>\\.nero\\nero-knowledge.db"

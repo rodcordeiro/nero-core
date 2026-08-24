@@ -48,7 +48,7 @@ Templates do Schema/scaffold so como fallback.
 ## Referencias
 
 | Arquivo | Quando ler |
-|---|---|
+| --- | --- |
 | `references/workflow.md` | Ordem antes de implementar, health, hibrido MCP+FS |
 | `references/mcp-tools.md` | Nomes de tools, inputs, reindex, git via MCP |
 | `references/compliance-security.md` | Checklist pos-register, anti-leak, commit/push |

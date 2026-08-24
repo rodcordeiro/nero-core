@@ -1,221 +1,165 @@
-Use obrigatoriamente a skill $nero e o MCP `nero-knowledge-base` como caminho preferencial de consulta, grafo e registro. Leia `references/mcp-tools.md` e `references/knowledge-routing.md` antes de registrar.
+Use obrigatoriamente a skill $nero e o MCP `nero-knowledge-base` como caminho preferencial de consulta, grafo e registro. Leia `references/mcp-tools.md` e `references/knowledge-routing.md` antes de registrar. Campos, vocabulario de `links:` e git via MCP vivem nessas references — este playbook e o roteiro.
 
 Objetivo:
-Revisar a aplicação `<NOME_DO_PROJETO>` (domínio primário: `<api|front|mobile|integracoes>`) e atualizar o Knowledge Repo (Markdown sob `KnowledgeRoot__Path`) sem duplicar notas e respeitando o contrato de notas/relações do MCP.
+Revisar a aplicacao `<NOME_DO_PROJETO>` (dominio primario: `<api|front|mobile|integracoes|powershell|mcp>`) e atualizar o Knowledge Repo (Markdown sob `KnowledgeRoot__Path`) sem duplicar notas.
 
 Premissas:
-- Markdown no Knowledge Repo é canônico; o SQLite deriva o grafo no reindex (`nero_admin_reindex`), que é responsabilidade do cliente após o lote de escritas.
-- O path `skills/nero/knowledge/` **não** é canônico no produto Nero — use o Knowledge Repo configurado.
-- Não alterar código da aplicação.
-- A leitura do filesystem do repo da aplicação é obrigatória para validar código de produto; contexto MCP não substitui essa evidência.
-- Não inventar regra de negócio: sem evidência conclusiva, registrar como hipótese (snapshot) ou omitir.
-- Nunca registrar credenciais, tokens, cookies, Authorization Bearer, URLs sensíveis, payloads sensíveis, PII ou valores reais de ambiente.
+- Markdown no Knowledge Repo e canonico; o SQLite deriva o grafo no reindex (`nero_admin_reindex`), responsabilidade do cliente apos o lote.
+- O path `skills/nero/knowledge/` nao e canonico — use o Knowledge Repo configurado.
+- Checkout da aplicacao: leitura obrigatoria; contexto MCP nao substitui evidencia de codigo. Codigo da aplicacao permanece intacto.
+- Registrar so o comprovado; evidencia fraca → hipotese (snapshot) ou omitir.
+- Secrets, tokens, cookies, Authorization Bearer, URLs/payloads sensiveis, PII e valores reais de ambiente ficam fora das notas.
 
 Placeholders:
 - `<NOME_DO_PROJETO>` — ex.: `Acme.Api`
 - `<KNOWLEDGE_REPO>` — root local do Knowledge Repo (`KnowledgeRoot__Path`)
-- `<REPOSITORIO_DA_APP>` — checkout da aplicação sob revisão
+- `<REPOSITORIO_DA_APP>` — checkout da aplicacao sob revisao
 
 ---
 
-## 1) Sync e contexto da aplicação
+## 1) Sync e contexto da aplicacao
 
-1. `git -C <KNOWLEDGE_REPO> pull --ff-only` (se houver mudanças locais, stash/commit antes; não forçar rebase). Preferir tools `nero_admin_git_*` quando disponíveis.
-2. Ler contexto essencial do repo da aplicação: README, AGENTS.md (se existir), docs relevantes e configs principais.
-3. Mapear stack, módulos, fronteiras, integrações, autenticação, observabilidade, testes e pipeline — sem editar código.
+Done when: Knowledge Repo atualizado (ff-only ou `nero_admin_git_pull`) e o mapa factual do app (README, AGENTS, stack, fronteiras) esta citado com paths.
+
+1. `git -C <KNOWLEDGE_REPO> pull --ff-only` (stash/commit local antes; preferir `nero_admin_git_*`).
+2. Ler README, AGENTS.md (se existir), docs e configs principais no checkout da app.
+3. Mapear stack, modulos, fronteiras, integracoes, autenticacao, observabilidade, testes e pipeline.
 
 ---
 
 ## 2) Consultar knowledge existente (MCP primeiro)
 
-Ordem obrigatória:
+Done when: health + context + search + related foram executados (ou fallback filesystem documentado), e a estrutura base do projeto existe.
 
-1. `nero_admin_status` (opcional, se a sessão parecer inconsistente).
-2. Em triage multi-projeto (fila de reviews): `nero_admin_ecosystem_health` primeiro.
+Ordem:
+
+1. `nero_admin_status` se a sessao parecer inconsistente.
+2. Fila multi-projeto: `nero_admin_ecosystem_health` primeiro.
    - Priorizar `projectsWithIssues` com `MissingRecentSnapshot` / `StaleSnapshot`.
-   - Para cada um, carregar o path do playbook na `recommendation` do issue e executar este fluxo com o nome do projeto (e domínio quando conhecido).
-   - Em seguida tratar issues estruturais (`MissingIndex`, `MissingContext`, etc.).
+   - Este arquivo ja e o playbook: para cada projeto da fila, execute as secoes seguintes com aquele nome (e dominio quando conhecido). Issues estruturais (`MissingIndex`, `MissingContext`, …) depois do frescor.
 3. `nero_admin_project_health` com `project=<NOME_DO_PROJETO>` e `primaryDomain=<dominio>`.
-   - Inspecionar `hasRecentSnapshot`, `latestSnapshotDate`, `latestSnapshotAgeDays` e issues de frescor interno.
-   - Se `hasRecentSnapshot=false` (issues `MissingRecentSnapshot` / `StaleSnapshot`), a `recommendation` aponta este playbook (`skills/nero/prompts/knowledge-review-app-mcp.txt`); carregar o arquivo e executar o fluxo com o projeto/dominio informados — nao esperar o texto do prompt embutido na recommendation.
-4. `nero_get_project_context` com `includeDecisions=true` e `includeTroubleshooting=true`.
-   - Usar `activeDecisions` como orientação vigente.
-   - Tratar `supersededDecisions` apenas como histórico (via `supersedes`).
-5. `nero_get_domain_context` para o domínio primário (`includeProjects=true`).
-6. `nero_search_knowledge` para precedentes, nomes antigos, sinônimos e débitos já registrados.
-7. `nero_find_related_knowledge` com `project` e/ou `topic`, filtrando `relationTypes` quando útil (`related_pattern`, `related_decision`, `belongs_to_domain`, etc.).
-8. Fallback: leitura direta em `<KNOWLEDGE_REPO>/` se o MCP falhar ou estiver desalinhado do filesystem.
+   - Inspecionar `hasRecentSnapshot`, `latestSnapshotDate`, `latestSnapshotAgeDays`.
+   - Entrada por health (`MissingRecentSnapshot` / `StaleSnapshot`): a `recommendation` aponta este path; continue as secoes seguintes. Entrada pelo indice (review geral): o health informa frescor; execute o fluxo completo mesmo com snapshot recente.
+4. `nero_get_project_context` (`includeDecisions=true`, `includeTroubleshooting=true`): `activeDecisions` vigentes; `supersededDecisions` historico.
+5. `nero_get_domain_context` do dominio primario (`includeProjects=true`).
+6. `nero_search_knowledge` para precedentes, nomes antigos, sinonimos e debitos ja registrados.
+7. `nero_find_related_knowledge` com `project` e/ou `topic` (`relationTypes` quando util).
+8. Fallback: leitura direta em `<KNOWLEDGE_REPO>/` se o MCP falhar ou divergir do filesystem.
 
-Se `exists=false` ou health indicar ausência de estrutura base: registrar projeto **antes** de qualquer outra nota.
+Se `exists=false` ou health indicar ausencia de estrutura base: `nero_register_project` **antes** de qualquer outra nota.
 
 ---
 
-## 3) Revisar a aplicação (somente leitura)
+## 3) Revisar a aplicacao (somente leitura)
 
-Mapear com evidência concreta no código. A análise de checkouts pode ser paralela entre apps; **não** escrever knowledge em paralelo — o lote de registro (seção 5+) é serial.
+Done when: cada achado abaixo tem path/trecho de evidencia, ou foi omitido de proposito.
 
-- regras de negócio (rotas, services, validators, DTOs, telas, hooks, jobs, consumers);
-- padrões reutilizáveis;
-- contratos públicos (endpoints, eventos, filas, payloads sanitizados, status codes, authz);
-- integrações e dependências externas;
-- conhecimentos tribais inferidos (com arquivo/trecho como evidência);
-- débitos técnicos, riscos, acoplamentos, fragilidades e lacunas de teste.
+Analise de checkouts pode ser paralela entre apps; escrita no knowledge (secao 5+) e **serial**.
 
-Não inventar regra: evidência fraca → hipótese explícita ou não registrar.
+Mapear:
+- regras de negocio (rotas, services, validators, DTOs, telas, hooks, jobs, consumers);
+- padroes reutilizaveis;
+- contratos publicos (endpoints, eventos, filas, payloads sanitizados, status codes, authz);
+- integracoes e dependencias externas;
+- conhecimentos tribais (arquivo/trecho como evidencia);
+- debitos, riscos, acoplamentos, fragilidades e lacunas de teste.
 
 ---
 
 ## 4) Classificar escopo (`escopo` das tools)
 
+Done when: cada nota planejada tem camada + `escopo`/path.
+
 | Camada | Quando usar | `escopo` / path |
 |---|---|---|
-| Projeto | Específico da aplicação | `escopo=project` + `projeto=<NOME>` → `projects/<NOME>/` |
-| Domínio | Orienta outros projetos do mesmo domínio | `escopo=domain` + `dominio=<api\|front\|mobile\|integracoes>` |
-| Global | Vale para >1 domínio ou convenção ampla do ecossistema | `escopo=global` |
+| Projeto | Especifico da aplicacao | `escopo=project` + `projeto=<NOME>` → `projects/<NOME>/` |
+| Dominio | Orienta outros projetos do mesmo dominio | `escopo=domain` + `dominio=<api\|front\|mobile\|integracoes\|powershell\|mcp>` |
+| Global | Vale para >1 dominio ou convencao ampla | `escopo=global` |
 
-Preferir a camada mais específica; promover só com evidência de reuso.
-
----
-
-## 5) Tipo de conhecimento → tool MCP (obrigatório)
-
-Registrar via `nero_register_*` / `nero_update_project_*`, em lote **serial** (uma escrita por vez no knowledge). Escrita manual em Markdown só se o MCP estiver indisponível/falhar; nesse caso usar templates do Knowledge Repo (ou scaffold) e o mesmo vocabulário de `links:`.
-
-Análise de repositórios de produto pode continuar em paralelo; consolidar e gravar knowledge só depois, em sequência.
-
-| Achado | Tool | Campos mínimos |
-|---|---|---|
-| Projeto inexistente / sem base | `nero_register_project` | `projeto`, `dominio` (ativo), `proposito`, `origem` |
-| Registrar dominio novo | `nero_register_domain` | `dominio`, `proposito`, `origem` (+ `arquivos`) |
-| Atualizar / reativar dominio | `nero_update_domain` | `dominio`, `proposito`, `arquivos` (+ `reativar` se inactive; `sourceFor` omitido preserva links) |
-| Inativar dominio | `nero_inactivate_domain` | `dominio`, `motivo`, `origem` (+ `confirmacao`/`evidencia` se houver projetos) |
-| Atualizar index do projeto | `nero_update_project_index` | `projeto`, `dominio`, `proposito`, `arquivos` (+ `origem`, `linksSemanticos`) |
-| Atualizar context do projeto | `nero_update_project_context` | `projeto`, `dominio`, `proposito`, `stack`, `superficie`, `resumoOperacional` (+ `skillOperacional`, `origem`, `linksSemanticos`) |
-| Criar/atualizar inventory do projeto | `nero_update_project_inventory` | `projeto`, `dominio`, `revisadoEm`, `classificacao`, `sinaisTecnicos` (+ git/origem, `linksSemanticos`) |
-| Regra de negócio comprovada | `nero_register_business_rule` | `titulo`, `escopo`, `regra`, `evidencia`, `origem` (+ `projeto`/`dominio`) |
-| Decisão técnica / mudança de orientação | `nero_register_decision` | `titulo`, `escopo`, `problema`, `opcoes`, `decisao`, `consequencias`, `origem`; se substitui decisão antiga: `supersedes=[path/id da decision]` |
-| Padrão reutilizável | `nero_register_pattern` | `titulo`, `escopo`, `contexto`, `padrao`, `quandoAplicar`, `quandoNaoAplicar`, `origem`; opcional `usadoPor`, `candidatoParaReuso`, `exemplos`, `excecoes` |
-| Validação / teste / critério de aceite | `nero_register_validation_rule` | `titulo`, `escopo`, `regra`, `criterio`, `evidencia`, `origem`; opcional `lacunasConhecidas` |
-| Inventário técnico, snapshot pontual, tribal knowledge com evidência, débito técnico observado | `nero_register_snapshot` | `titulo`, `escopo`, `contexto`, `evidencia`, `origem`; opcional `relacionadoA`, `evidenciaDe` |
-| Incidente / troubleshooting | `nero_register_troubleshooting` | `titulo`, `escopo`, `sintoma`, `causa`, `acao`, `evidencia`, `impacto`, `origem`; opcional `solucao`, `prevencao`, `causadoPor`, `relacionadoA` |
-
-Contrato `linksSemanticos` (nao-minimos: `uses_backend`, `depends_on`, …): **omitir** preserva os existentes; lista `type:target` substitui o conjunto; `[]` limpa de proposito. `documents`/`belongs_to_domain` sao derivados — nao passe-os. Remova link invalido com lista explicita sem o item (nunca “deixar sumir” por rewrite). Nao depender so de `nero_link_knowledge` para durar apos reindex.
-
-Mapeamento semântico:
-
-- “contexto do projeto / inventário” → `nero_update_project_context` e/ou `nero_update_project_inventory` (bootstrap com `nero_register_project` se faltar base); evidencia longa → `nero_register_snapshot`;
-- “conhecimentos tribais” → `snapshot` (ou `pattern`/`decision` se for regra/orientação estável);
-- “débitos técnicos” → `snapshot` (estado observado) e, se houver decisão de tratamento, `decision`;
-- “complementar nota vigente” → editar a nota existente no filesystem (MCP register cria nota nova; não duplicar por título/sinônimo);
-- “mudança de orientação” → **nova** `decision` com `supersedes` apontando para a decision antiga (nunca `updates` no lugar de `supersedes`).
-
-Anti-duplicação antes de registrar:
-
-1. `nero_search_knowledge` + `nero_find_related_knowledge` + health/context.
-2. Se já existir nota equivalente: complementar a vigente; não criar clone.
-3. Se a orientação mudou: nova decision com `supersedes`; preservar a antiga como histórico.
+Camada mais especifica; promover so com evidencia de reuso (`references/knowledge-routing.md`).
 
 ---
 
-## 6) Contrato de relações (vocabulário preferencial)
+## 5) Tipo de conhecimento → tool MCP
 
-As tools `nero_register_*` emitem `links:` preferenciais. Não inventar tipos. Não usar legado.
+Done when: cada achado tem uma tool (ou edicao da nota vigente), o lote e serial, e search/related confirmaram nota vigente vs nota nova.
 
-Vocabulário permitido:
+Registrar via `nero_register_*` / `nero_update_project_*`, uma escrita por vez. Markdown direto so se o MCP falhar; templates do Knowledge Repo e o mesmo vocabulario de `links:`. Campos minimos: `references/mcp-tools.md`.
 
-- `belongs_to_domain` — projeto/nota → domínio primário
-- `documents` — nota documenta/contextualiza alvo
-- `evidences` — snapshot → **nota concreta com slug** (nunca hub: `index`, `context`, `domains/*/patterns`, `projects/*/decisions`)
-- `updates` — evolução entre notas (não usar para substituir decision)
-- `depends_on` — dependência comprovada; orientação **consumer → backend**
-- `uses_backend` — front/mobile → API/lib
-- `related_decision` / `related_pattern` — ligação semântica direta
-- `source_for` — pattern/fonte → consumidores (`usadoPor` no register)
-
-Especial (allowlist estreita):
-
-- `supersedes` — **somente decision → decision**. Não colapsar em `updates`.
-
-Proibido (validate rejeita): `relates_to`, `caused_by`, `used_by`, `candidate_for_reuse` e qualquer tipo fora da lista.
-
-Mapeamento dos campos de link das tools:
-
-| Campo da tool | Edge emitida |
+| Achado | Tool |
 |---|---|
-| `pattern.usadoPor` | `source_for` |
-| `pattern.candidatoParaReuso` | `documents` / `related_pattern` / `related_decision` (conforme path do alvo) |
-| `snapshot.relacionadoA` | `documents` |
-| `snapshot.evidenciaDe` | `evidences` (somente nota concreta) |
-| `troubleshooting.causadoPor` | `related_decision` ou `documents` |
-| `troubleshooting.relacionadoA` | `related_pattern` / `related_decision` / `documents` |
-| `decision.supersedes` | `supersedes` |
-| business/validation/decision (mínimo por escopo) | `documents` (+ `belongs_to_domain` se houver domínio) |
+| Projeto inexistente / sem base | `nero_register_project` |
+| Dominio novo | `nero_register_domain` |
+| Atualizar / reativar dominio | `nero_update_domain` |
+| Inativar dominio | `nero_inactivate_domain` |
+| Index / context / inventory do projeto | `nero_update_project_index` / `nero_update_project_context` / `nero_update_project_inventory` |
+| Regra de negocio comprovada | `nero_register_business_rule` |
+| Decisao / mudanca de orientacao | `nero_register_decision` (`supersedes` se substitui decision antiga) |
+| Padrao reutilizavel | `nero_register_pattern` |
+| Validacao / teste / criterio de aceite | `nero_register_validation_rule` |
+| Inventario, tribal knowledge, debito observado | `nero_register_snapshot` |
+| Incidente / troubleshooting | `nero_register_troubleshooting` |
 
-`nero_link_knowledge`:
+Roteamento:
+- contexto / inventario → `nero_update_project_*` (bootstrap com `nero_register_project`); evidencia longa → snapshot;
+- tribal → snapshot (ou pattern/decision se for regra/orientacao estavel);
+- debito → snapshot; se houver tratamento acordado, decision;
+- complementar nota vigente → editar a nota no filesystem (register cria nota nova);
+- mudanca de orientacao → **nova** decision com `supersedes`; `updates` e evolucao entre notas, nao substitui decision.
 
-- usar só para edge manual idempotente entre nodes **já indexados**;
-- **não** altera frontmatter Markdown;
-- preferir `nero_register_*` (ou edição do `links:` no Markdown) para relação canônica;
-- sempre informar `evidence` curta e comprovada;
-- não criar link por coocorrência, mesma pasta ou proximidade temporal.
-
-Regras de qualidade do grafo:
-
-- notas de conteúdo precisam de `links:` não vazio;
-- sem `depends_on` para o próprio projeto;
-- sem `depends_on`/`uses_backend` invertidos (API → Front/Mobile);
-- sem `evidences` para hubs;
-- domínio primário do repo em `belongs_to_domain`; `integracoes` só como segundo domínio quando for API/barramento central de integração.
+Anti-duplicacao:
+1. `nero_search_knowledge` + `nero_find_related_knowledge` + health/context.
+2. Equivalente existente → complementar a vigente.
+3. Orientacao mudou → nova decision com `supersedes`; a antiga permanece historico.
 
 ---
 
-## 7) Segurança na escrita
+## 6) Relacoes
 
-- Sanitizar exemplos de contratos, logs e troubleshooting.
-- Não expor valores reais de ambiente.
-- Evidências devem citar arquivos/comportamentos, não segredos.
+Done when: cada nota de conteudo do lote tem `links:` nao vazio no vocabulario preferencial.
+
+Vocabulario, mapeamento de campos e regras do grafo: `references/knowledge-routing.md` e `references/mcp-tools.md`.
+
+Relacao canonica: writer ou edicao de `links:` no Markdown. `nero_link_knowledge` so para edge manual entre nodes **ja indexados** (SQLite, sem frontmatter). Informe `evidence` curta. Relacao por coocorrencia, pasta ou data fica de fora.
+
+---
+
+## 7) Seguranca na escrita
+
+Done when: exemplos, logs e evidencias citam arquivos/comportamentos, com placeholders da allowlist.
+
+Sanitizar contratos, logs e troubleshooting. Checklist: `references/compliance-security.md`.
 
 ---
 
 ## 8) Validar antes de concluir
 
-`nero_register_*` / `nero_update_project_*` apenas gravam Markdown; **não** reindexam. Após concluir o lote de criações/edições de knowledge:
+Done when: `nero_admin_validate` retorna `isValid=true` e `isCompliant=true`, e `diff --check` (ou `nero_admin_git_status`) esta limpo.
 
-1. `nero_admin_reindex` (uma vez, no fim do lote — responsabilidade do cliente)
-2. `nero_admin_validate` → `isValid` e `isCompliant` devem ser `true` (obrigatório antes do commit). Se so compliance falhar, use `nero_admin_compliance_scan` para triage/quarentena.
-3. Opcional: `nero_admin_check_index_consistency` se houver suspeita MCP ↔ filesystem
-4. Conferir ausência de duplicação óbvia e links quebrados
-5. `git -C <KNOWLEDGE_REPO> diff --check` (ou `nero_admin_git_status`)
-
-Não confiar em `search`/`find_related`/`get_*_context` para notas acabadas de gravar antes do reindex. Não commitar se `nero_admin_validate` falhar.
+Writers gravam Markdown. Apos o lote, execute o checklist em `references/workflow.md` e `references/compliance-security.md` (`nero_admin_reindex` uma vez, depois `nero_admin_validate`). Search/context/related de notas recem-gravadas depois do reindex.
 
 ---
 
-## 9) Commit e push (somente se houver alteração no Knowledge Repo)
+## 9) Commit e push (somente se houver alteracao no Knowledge Repo)
 
-Preferir `nero_admin_create_commit` + `nero_admin_git_push` quando disponíveis. Fallback shell:
+Done when: commit (e push, se pedido) cobre so paths de knowledge allowlisted, ou a secao foi omitida porque o diff estava vazio.
 
-```text
-git -C <KNOWLEDGE_REPO> add .
-git -C <KNOWLEDGE_REPO> commit -m "knowledge: review <NOME_DO_PROJETO>"
-git -C <KNOWLEDGE_REPO> push
-```
-
-Não incluir `*.db`, segredos ou arquivos fora do corpus Markdown sem necessidade. Stage apenas paths de knowledge/docs allowlisted.
+Preferir `nero_admin_create_commit` + `nero_admin_git_push`. Mensagem: `knowledge: review <NOME_DO_PROJETO>`. Gates e fallback shell: `references/compliance-security.md`.
 
 ---
 
-## 10) Resumo final obrigatório
+## 10) Resumo final
+
+Done when: os 10 itens abaixo citam paths/tools/resultados reais deste run (ou “omitido” com motivo).
 
 Informar:
-
-1. aplicação revisada e domínio;
-2. contexto MCP usado (`project_context`, `domain_context`, searches, related, health);
-3. áreas/arquivos principais analisados no repo da app;
-4. notas criadas/atualizadas/superseded (paths + tools usadas);
-5. regras de negócio registradas;
-6. padrões registrados (`source_for` / reuso quando houver);
-7. snapshots de tribal knowledge / inventário / débitos;
+1. aplicacao revisada e dominio;
+2. contexto MCP usado (health, project_context, domain_context, searches, related);
+3. areas/arquivos principais analisados no repo da app;
+4. notas criadas/atualizadas/superseded (paths + tools);
+5. regras de negocio registradas;
+6. padroes registrados (`source_for` / reuso);
+7. snapshots de tribal knowledge / inventario / debitos;
 8. troubleshooting/decisions relevantes;
-9. validações (`reindex`, `validate.isValid`, `diff --check`, commit/push);
-10. lacunas, hipóteses e o que foi conscientemente ignorado.
+9. validacoes (`reindex`, `validate.isValid` / `isCompliant`, `diff --check`, commit/push);
+10. lacunas, hipoteses e o que foi conscientemente ignorado.

@@ -1,47 +1,34 @@
 # Conflitos de merge no Knowledge Repo
 
-Use esta referencia quando resolver conflitos de merge em arquivos Markdown do Knowledge Repo (`KnowledgeRoot__Path`).
+Use quando houver conflito de merge em Markdown do Knowledge Repo (`KnowledgeRoot__Path`).
 
-## Regra geral
+Classifique antes de editar. Done when: o tipo (snapshot / regra de negocio / codigo) esta nomeado e a resolucao segue o ramo abaixo.
 
-Ao resolver um conflito, preserve a intencao das duas alteracoes ate entender o tipo de informacao em disputa.
+## Snapshot
 
-Classifique o conflito antes de editar:
+Done when: as duas versoes permanecem no corpus, cada uma com nota de merge.
 
-- snapshot;
-- regra de negocio;
-- regra de codigo ou implementacao.
-
-## Snapshots
-
-Quando o conflito envolver snapshots de conhecimento, mantenha ambos os registros.
-
-Indique explicitamente que os snapshots estavam em conflito no merge, para preservar o historico e deixar claro que as duas versoes coexistiam no momento da integracao.
-
-Use uma nota curta no proprio registro ou na secao afetada, por exemplo:
+Mantenha ambos os registros. No proprio registro ou na secao afetada:
 
 ```md
 > Nota de merge: este snapshot estava em conflito com outro registro e ambos foram mantidos.
 ```
 
-## Regras de negocio
+## Regra de negocio
 
-Quando o conflito envolver regra de negocio, questione o usuario antes de escolher uma versao.
+Done when: o usuario escolheu a versao (ou a consolidacao), apos ver as duas regras, os paths e o impacto pratico.
 
-Nao assuma qual regra e valida apenas pela versao mais recente, pela branch atual ou pela branch recebida. Regras de negocio podem representar decisoes externas ao codigo.
+Pergunte antes de escolher. Recencia, branch atual ou branch recebida nao decidem sozinhas — regra de negocio pode ser decisao externa ao codigo.
 
-Ao perguntar, informe objetivamente:
-
+Ao perguntar, informe:
 - quais regras estao em conflito;
 - onde cada uma aparece;
-- qual seria o impacto pratico de manter cada versao, quando for possivel inferir.
+- o impacto pratico de manter cada versao, quando for possivel inferir.
 
-## Regras de codigo ou implementacao
+## Codigo ou implementacao
 
-Quando o conflito envolver regras de codigo, padroes tecnicos, comandos, exemplos de implementacao ou comportamento derivado do repositorio, revise o codigo antes de decidir.
+Done when: a regra unica restante bate com o checkout atual (codigo, teste, config ou historico tecnico).
 
-Mantenha apenas a informacao valida para o estado atual do projeto.
+Revise o codigo antes de decidir. Mantenha o que e valido para o estado atual. Se as duas versoes forem parcialmente corretas, consolide numa regra unica.
 
-Se as duas versoes estiverem parcialmente corretas, consolide em uma regra unica e remova duplicidade, ambiguidade ou instrucao obsoleta.
-
-Registre excecoes somente quando elas forem comprovadas pelo codigo, por testes, por configuracao do projeto ou por historico tecnico confiavel.
+Excecoes so com evidencia no codigo, testes, config ou historico tecnico.

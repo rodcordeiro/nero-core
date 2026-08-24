@@ -1,7 +1,6 @@
 # Repository Guidelines — API
 
-Fonte canônica na skill `$nero`: `references/guidelines/api-guidelines.md`.
-Também aplica a domínio `integracoes` (herança: hubs/barramentos/consumers tipicamente API).
+Tambem aplica a dominio `integracoes` (heranca: hubs/barramentos/consumers tipicamente API). Aplique cada regra da secao que a tarefa tocar.
 
 ## Project Structure & Module Organization
 
@@ -16,14 +15,14 @@ Always use the skill `$dotnet-backend-patterns` for .NET backend work when avail
 - Keep data access isolated in repositories, query services, ORM adapters, or the persistence layer already used by the project.
 - Preserve public API contracts unless the task explicitly includes a compatibility plan.
 - For API changes, validate routes, status codes, JSON payloads, headers, pagination, filtering, and error contracts.
-- Do not invent business rules. If behavior is unclear, mark the assumption explicitly and keep the implementation narrow.
-- Do not expose persistence entities directly through public APIs unless that is already the established contract.
+- Encode only proven business rules. If behavior is unclear, mark the assumption explicitly and keep the implementation narrow.
+- Keep persistence entities behind DTOs/contracts at the public API unless that is already the established contract.
 - Prefer DTOs/contracts for request and response models, with validation at the API boundary.
 - Propagate cancellation/timeouts where the stack supports it, especially for database and HTTP calls.
 - Use exceptions for exceptional failures, not expected business flow; prefer a result/error contract for recoverable domain outcomes when the project already supports it.
 - Preserve authentication, authorization, audit, logging, correlation IDs, and observability behavior when refactoring.
 - Treat migrations, schema changes, background jobs, integrations, and message consumers as production-sensitive surfaces.
-- Do not change migrations, CI/CD, infrastructure, or package dependencies without explicit technical and operational justification.
+- Change migrations, CI/CD, infrastructure, or package dependencies only with explicit technical and operational justification.
 - Keep changes small, local, reversible, and verifiable.
 - Prefer root-cause analysis before changing production code or tests.
 
@@ -68,7 +67,7 @@ For .NET, prefer PascalCase for public types and members, interfaces with the es
 
 Validation should be proportional to risk. Business rules need focused unit tests. Public API behavior needs integration or e2e tests that cover route, status code, payload, validation, authorization, and error mapping. Persistence changes need migration/schema verification and queries exercised against a realistic provider when possible. Integration changes need success, failure, timeout, and retry/error-path coverage when practical.
 
-Do not weaken tests to make failures pass. If a test is obsolete because a contract changed, record the contract decision and update the test to the new explicit behavior. If tests cannot be run, state the reason and provide the strongest inspection evidence available.
+Keep tests faithful to the contract. If a test is obsolete because a contract changed, record the contract decision and update the test to the new explicit behavior. If tests cannot be run, state the reason and provide the strongest inspection evidence available.
 
 ## Commit & Pull Request Guidelines
 
@@ -78,4 +77,4 @@ For backend changes, always call out public API compatibility, data impact, secu
 
 ## Security & Configuration Tips
 
-Review configuration, authentication, authorization, secrets handling, logging, Datadog/Sentry/OpenTelemetry, database access, and external integrations before changing backend behavior. Do not commit secrets, tokens, cookies, private keys, `.env` values, or machine-specific configuration. Avoid logging sensitive payloads or identifiers unless the project already has an approved masking strategy. Treat migrations, background processing, retries, idempotency, and integration calls as operational-risk areas that need explicit evidence before release.
+Review configuration, authentication, authorization, secrets handling, logging, Datadog/Sentry/OpenTelemetry, database access, and external integrations before changing backend behavior. Keep secrets, tokens, cookies, private keys, `.env` values, and machine-specific configuration out of commits. Log only with the project's approved masking strategy. Treat migrations, background processing, retries, idempotency, and integration calls as operational-risk areas that need explicit evidence before release.

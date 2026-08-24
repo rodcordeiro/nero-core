@@ -1,83 +1,75 @@
 # Roteamento de conhecimento Nero
 
-O corpus canônico vive no **Knowledge Repo** (`KnowledgeRoot__Path`). Camadas abaixo são relativas a esse root.
+Camadas abaixo sao relativas ao Knowledge Repo (`KnowledgeRoot__Path`). Escolha de camada, promocao, estilo de nota, `Dono` e significado de `links:`.
 
-## Escolha da camada
+Mapeamento campo-da-tool → edge: `mcp-tools.md`. Pos-lote: `compliance-security.md`.
 
-Use `global` quando a informacao valer para todo o ecossistema documentado: convencoes, autenticacao compartilhada, observabilidade, seguranca, pipelines, integracoes centrais e politicas de compatibilidade.
+## Camada
 
-Use `domains/<dominio>` quando a informacao valer para uma familia de projetos: APIs .NET/NestJS, apps mobile Expo/React Native, fronts web, integracoes, dados ou pipelines.
+Done when: cada nota planejada tem `escopo` (`global` | `domain` | `project`) e o path correspondente.
 
-Use `projects/<projeto>` quando a informacao depender do fluxo, contrato, backend, tela, banco local, pipeline ou historico daquele projeto (ex.: `Acme.Api`).
+| Camada | Quando | Path |
+|---|---|---|
+| `global` | Vale para o ecossistema: convencoes, autenticacao compartilhada, observabilidade, seguranca, pipelines, integracoes centrais | `global/` |
+| `domain` | Vale para uma familia (`api`, `front`, `mobile`, `integracoes`, `powershell`, `mcp`) | `domains/<dominio>/` |
+| `project` | Depende do fluxo, contrato, tela, banco ou historico daquele app (ex.: `Acme.Api`) | `projects/<projeto>/` |
 
-## Busca por precedentes
+Camada mais especifica. Dominio primario do repo em `belongs_to_domain`; `integracoes` como segundo dominio so para API/barramento central.
 
-Antes de criar uma solucao nova para regra de negocio, validacao, teste, erro recorrente ou integracao:
+## Precedente
 
-1. Buscar no dominio relacionado.
-2. Buscar em projetos irmaos do mesmo dominio.
-3. Reaproveitar o padrao quando a regra for equivalente.
-4. Registrar diferencas quando o projeto atual exigir comportamento proprio.
+Done when: dominio + projetos irmaos foram buscados, e a nota nova ou reusa o padrao ou registra a diferenca com evidencia.
 
-## Criterio de promocao
+Antes de solucao nova para regra, validacao, teste, erro recorrente ou integracao: buscar no dominio, depois em irmaos; reaproveitar quando equivalente; registrar so o desvio local.
 
-Promover projeto -> dominio quando:
+## Promocao
 
-- a regra pode ser aplicada em outro projeto do mesmo dominio;
-- a causa raiz evita incidente recorrente;
-- o padrao reduz retrabalho em novas implementacoes;
-- a decisao afeta convencoes de teste, validacao, integracao ou deploy.
+Done when: a promocao cita evidencia de reuso (outro projeto ou outro dominio), ou a nota permanece na camada atual.
 
-Promover dominio -> global quando:
+Projeto → dominio quando a regra serve a outro projeto do mesmo dominio, evita incidente recorrente, reduz retrabalho, ou afeta teste/validacao/integracao/deploy.
 
-- a decisao afeta mais de um dominio;
-- a regra envolve seguranca, autenticacao, dados sensiveis, observabilidade ou pipeline compartilhado;
-- o conhecimento define convencao ampla do ecossistema.
+Dominio → global quando afeta mais de um dominio, ou e convencao ampla (seguranca, autenticacao, dados sensiveis, observabilidade, pipeline).
 
-## Estilo das notas
+## Estilo
 
-- Ser curto e acionavel.
-- Separar regra de evidencia.
-- Incluir origem, escopo, exemplos e excecoes.
-- Incluir arquivos, comandos ou endpoints quando forem relevantes.
-- Registrar data de revisao quando houver risco de desatualizacao.
-- Evitar copiar logs longos; resumir sintoma, causa raiz e acao util.
+Done when: a nota separa regra de evidencia, cita origem/escopo, e inclui path ou comando quando a regra depende deles.
+
+Notas curtas e acionaveis. Incluir exemplos e excecoes. Data de revisao quando houver risco de stale. Sintoma, causa e acao no lugar de log longo.
 
 ## Dono em decisions
 
-No campo `Dono` da secao `## Revisao` de uma **decision**:
+Done when: `## Revisao` → `Dono` e o autor humano do commit que implementou (nome do `git log` / `Author`), ou ficou vazio de proposito.
 
-- Use o **autor do commit que implementou** a decisao (nome do `git log` / `Author`, sem e-mail — e-mail dispara compliance `pii_suspect`).
-- Nao use autores-agente: nomes/identidades de Cursor, Codex, Claude, Copilot, GPT, Auto ou equivalentes nao sao dono.
-- Se o commit de implementacao for de agente, deixe `Dono` vazio ou use o humano solicitante conhecido (ticket, PR, pedido na sessao) — nao invente.
-- `nero_register_decision` deixa `Dono` em branco; preencha na edicao logo apos o register (ou no scaffold manual) antes de reindex/commit.
+`nero_register_decision` deixa `Dono` em branco; preencha na edicao logo apos o register, antes de reindex/commit. Sem e-mail (`pii_suspect`). Identidades de agente (Cursor, Codex, Claude, Copilot, GPT, Auto) ficam de fora; se o commit for de agente, use o humano solicitante conhecido (ticket, PR, pedido) ou deixe vazio.
 
-## Relações no grafo
+## Relacoes (`links:`)
 
-Adicione nas notas frontmatter de relacionamentos (`links:`). Crie somente relações diretas, semânticas e comprovadas. Prefira as tools `nero_register_*`, que emitem apenas o vocabulário preferencial.
+Done when: cada nota de conteudo tem `links:` nao vazio no vocabulario abaixo, com alvo direto e comprovado.
 
-Vocabulário preferencial:
+Writers `nero_register_*` emitem este vocabulario. Markdown e canonico; SQLite deriva edges no reindex.
 
-- `belongs_to_domain`;
-- `documents`;
-- `evidences` (alvo = nota concreta com slug; nunca hub/pasta como `domains/*/patterns` ou `index`);
-- `updates`;
-- `depends_on` / `uses_backend` (orientação esperada: consumer → backend; não inverter API/lib → Front/Mobile);
-- `related_decision`;
-- `related_pattern`;
-- `source_for`.
+| Relacao | Uso |
+|---|---|
+| `belongs_to_domain` | Projeto/nota → dominio primario |
+| `documents` | Nota documenta/contextualiza um alvo |
+| `evidences` | Snapshot → nota concreta com slug (hubs `index`, `context`, `domains/*/patterns`, `projects/*/decisions` ficam de fora) |
+| `updates` | Evolucao entre notas |
+| `depends_on` | Dependencia; consumer → backend |
+| `uses_backend` | Front/Mobile → API/lib |
+| `related_decision` | Ligacao a uma decision |
+| `related_pattern` | Ligacao a um pattern |
+| `source_for` | Pattern/fonte → consumidores (`usadoPor`) |
+| `supersedes` | **Somente** decision → decision; o split vigente/historico de `nero_get_project_context` depende dela |
 
-Relação especial (decision→decision apenas): `supersedes`. Não colapsar em `updates`; o split active/superseded do contexto de projeto depende dela.
+`updates` e evolucao; `supersedes` substitui orientacao. `nero_admin_validate` rejeita legado (`relates_to`, `caused_by`, `used_by`, `candidate_for_reuse`) e qualquer tipo fora da tabela.
 
-Evite tipos legados (`relates_to`, `caused_by`, `used_by`, `candidate_for_reuse`): `nero_admin_validate` rejeita. Notas de conteúdo (decisions, patterns, business-rules, troubleshooting, snapshots, validation-and-tests) precisam de `links:` não vazio.
+Relacao so com evidencia semantica direta (alvo nomeado, nao pasta/data/coocorrencia).
 
-Não crie relações apenas por coocorrência, mesma pasta, aparência ou proximidade temporal. O grafo é derivado e reindexável; Markdown continua canônico. As tools `nero_register_*` **não** reindexam: o cliente chama `nero_admin_reindex` uma vez após concluir o lote de escritas, depois `nero_admin_validate` → (opcional) `check_index_consistency`.
+## Checklist do grafo
 
-Em projetos, prefira o dominio primario do repositorio; use `domains/integracoes` como segundo dominio apenas para APIs/barramentos centrais de integracao ou agregados funcionais de integracao.
+Done when: os quatro itens abaixo sao verdadeiros.
 
-## Checklist antes de concluir revisoes no Knowledge Repo
-
-- nenhum alvo de `links:` quebrado;
-- nenhuma relacao duplicada no mesmo arquivo;
-- nenhum `depends_on` apontando para o proprio projeto;
-- `git diff --check` no Knowledge Repo.
+- alvos de `links:` resolvem;
+- sem relacao duplicada no mesmo arquivo;
+- sem `depends_on` para o proprio projeto;
+- `git diff --check` no Knowledge Repo (ou `nero_admin_git_status`).

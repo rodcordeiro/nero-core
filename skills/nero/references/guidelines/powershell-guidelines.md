@@ -1,8 +1,6 @@
 # Repository Guidelines - PowerShell
 
-Fonte canonica na skill `$nero`: `references/guidelines/powershell-guidelines.md`.
-
-Use for PowerShell modules, standalone script collections, Windows automation repositories, and mixed `.ps1` / `.psm1` / `.psd1` workspaces.
+Use for PowerShell modules, standalone script collections, Windows automation repositories, and mixed `.ps1` / `.psm1` / `.psd1` workspaces. Aplique cada regra da secao que a tarefa tocar.
 
 ## Project Structure & Module Organization
 
@@ -10,21 +8,21 @@ Preserve the checkout structure before introducing a new layout. In module repos
 
 For standalone script repositories, distinguish active scripts from references, examples, generated exports, logs, and legacy snippets. A folder such as `scripts/` should be treated as the operational surface; a folder such as `references/` or `referencies/` should be treated as source material unless the checkout documents otherwise.
 
-Do not move a function between module, public, private, script, or reference areas just to match this guideline. Document the real layout in `.agents/references/structure.md`; record divergence as debt only when it blocks safe maintenance.
+Keep functions in their current module, public, private, script, or reference area. Document the real layout in `.agents/references/structure.md`; record divergence as debt only when it blocks safe maintenance.
 
 ## PowerShell Domain Rules
 
 - Keep public functions small and command-shaped: parameter binding, validation, pipeline behavior, help, and calls into private helpers.
 - Put reusable implementation in private helpers instead of duplicating it across public commands.
 - Prefer approved verb-noun command names and keep filenames aligned with exported function names.
-- Do not export everything by wildcard unless the repository already depends on that behavior; when changing exports, preserve compatibility or document the breaking change.
+- Export the public command set explicitly; wildcard exports only when the repository already depends on that behavior. Changing exports: preserve compatibility or document the breaking change.
 - Treat `.psd1` metadata as release-sensitive: version, `RootModule`, `RequiredModules`, `NestedModules`, `FunctionsToExport`, `HelpInfoURI`, `ProjectUri`, and tags affect install, publish, and discovery.
 - Treat scripts that modify registry, services, scheduled tasks, VPN, network shares, disk cleanup, package installation, GitHub settings, or user profiles as machine-affecting operations.
 - Use `SupportsShouldProcess`, `-WhatIf`, `-Confirm`, and clear `ConfirmImpact` for destructive or broad file/system changes.
 - Resolve paths with `-LiteralPath` when user input or spaces are possible. Validate recursive delete/move/copy roots before acting.
-- Never log or commit tokens, credentials, API keys, bearer values, vault secrets, secure strings, personal IDs, or machine-specific connection data.
-- Use `SecretManagement`, `SecretStore`, Windows Credential Manager, environment variables, or CI secrets for credentials; never hardcode real values.
-- Do not make network/API calls at module import time. Keep external calls inside commands or explicit initialization functions.
+- Keep tokens, credentials, API keys, bearer values, vault secrets, secure strings, personal IDs, and machine-specific connection data out of logs and commits. Use placeholders in examples.
+- Use `SecretManagement`, `SecretStore`, Windows Credential Manager, environment variables, or CI secrets for credentials; examples and tests use placeholders.
+- Keep external calls inside commands or explicit initialization functions; module import stays local and deterministic.
 - Preserve comment-based help for public commands and update generated docs/help XML when the repo uses them.
 
 ## Module Defaults

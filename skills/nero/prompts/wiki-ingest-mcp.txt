@@ -1,83 +1,73 @@
-Use obrigatoriamente a skill $nero e o MCP nero-knowledge-base quando disponivel. Leia references/mcp-tools.md e references/knowledge-routing.md antes de registrar.
+Use obrigatoriamente a skill $nero e o MCP nero-knowledge-base quando disponivel. Leia `references/mcp-tools.md` e `references/knowledge-routing.md` antes de registrar. Campos, vocabulario de `links:` e git via MCP vivem nessas references — este playbook e o roteiro.
 
-Fluxo de ingestao de wiki/Markdown externo → Knowledge Repo:
+Fluxo de ingestao de wiki/Markdown externo → Knowledge Repo.
 
 Placeholders:
 - `<WIKI_REPO>` — checkout local da wiki ou fonte Markdown (pull/ff-only antes de ler)
 - `<KNOWLEDGE_REPO>` — root do Knowledge Repo (`KnowledgeRoot__Path`)
 - `<NOME_DO_PROJETO>` — nome canonico no knowledge (ex.: `Acme.Billing.Api`)
 
-1. Identifique arquivos Markdown criados ou alterados somente neste intervalo:
-   - rode `git -C <WIKI_REPO> pull --ff-only`;
-   - considere arquivos adicionados, modificados ou renomeados;
-   - ignore arquivos deletados, exceto se a exclusao indicar decisao/regra superseded relevante.
+1. Identifique o intervalo.
+   Done when: lista de paths Markdown added/modified/renamed (deletes so se indicarem decision/regra superseded).
+   - `git -C <WIKI_REPO> pull --ff-only`;
+   - considere adicionados, modificados ou renomeados.
 
-2. Leia autonomamente apenas os arquivos Markdown relevantes desse intervalo:
-   - ignore conteudo transitorio, duplicado, incompleto, puramente operacional ou sem valor reutilizavel;
-   - nunca registre credenciais, tokens, cookies, Authorization Bearer, URLs sensiveis, payloads sensiveis, connection strings, PATs, webhooks secretos ou dados sigilosos;
-   - na origem, cite o path relativo da wiki (sem query strings, tokens embutidos ou trechos sensiveis).
+2. Leia so os Markdown desse intervalo com valor reutilizavel.
+   Done when: cada arquivo lido foi classificado (ingerir / descartar) e a origem cita o path relativo da wiki.
+   - Descarte transitorio, duplicado, incompleto ou puramente operacional.
+   - Secrets, tokens, cookies, Authorization Bearer, URLs/payloads sensiveis, connection strings, PATs, webhooks secretos e dados sigilosos ficam fora das notas; origem sem query strings nem trechos sensiveis.
 
-3. Extraia apenas conhecimento reutilizavel e classifique o tipo MCP:
-   - regra de negocio → nero_register_business_rule;
-   - decisao tecnica → nero_register_decision;
-   - padrao de implementacao → nero_register_pattern;
-   - validacao/teste/criterio de aceite → nero_register_validation_rule;
-   - incidente/troubleshooting → nero_register_troubleshooting;
-   - evidencia pontual/inventario/diagnostico versionado → nero_register_snapshot;
-   - contratos, eventos ou integracoes: registrar como pattern, decision ou business_rule conforme o conteudo; se for estado observado, use snapshot com evidenciaDe apontando para a nota concreta sustentada.
+3. Extraia conhecimento reutilizavel e classifique o tipo MCP.
+   Done when: cada trecho ingerido tem exatamente uma tool `nero_register_*`.
+   - regra de negocio → `nero_register_business_rule`;
+   - decisao tecnica → `nero_register_decision`;
+   - padrao de implementacao → `nero_register_pattern`;
+   - validacao/teste/criterio de aceite → `nero_register_validation_rule`;
+   - incidente/troubleshooting → `nero_register_troubleshooting`;
+   - evidencia pontual/inventario/diagnostico versionado → `nero_register_snapshot`;
+   - contratos, eventos ou integracoes: pattern, decision ou business_rule conforme o conteudo; estado observado → snapshot com `evidenciaDe` para a nota concreta.
 
-4. Classifique o escopo MCP (escopo + campos auxiliares):
-   - escopo: project + projeto: <NOME_DO_PROJETO> → projects/<projeto>/;
-   - escopo: domain + dominio: api|front|mobile|integracoes → domains/<dominio>/;
-   - escopo: global → global/;
-   - se o projeto ainda nao existir no knowledge: rode nero_admin_project_health e, se necessario, nero_register_project antes de qualquer outra nota do projeto.
+4. Classifique o escopo MCP.
+   Done when: cada nota tem `escopo` + campos auxiliares, e o projeto existe no knowledge.
+   - `project` + `projeto`: `<NOME_DO_PROJETO>` → `projects/<projeto>/`;
+   - `domain` + `dominio`: `api|front|mobile|integracoes|powershell|mcp` → `domains/<dominio>/`;
+   - `global` → `global/`;
+   - projeto ausente: `nero_admin_project_health` e, se preciso, `nero_register_project` antes de qualquer outra nota.
 
-5. Antes de escrever, consulte o knowledge existente (MCP primeiro):
-   - nero_search_knowledge (sinonimos, titulos, nomes antigos);
-   - nero_get_project_context quando houver projeto (use activeDecisions como vigente; trate supersededDecisions como historico);
-   - nero_get_domain_context quando o escopo for de dominio;
-   - nero_find_related_knowledge antes de criar regra/padrao/decisao nova;
-   - fallback: busca direta em <KNOWLEDGE_REPO>/ se o MCP estiver indisponivel.
+5. Consulte o knowledge existente (MCP primeiro).
+   Done when: search + context (projeto/dominio) + related rodaram, ou o fallback filesystem foi documentado.
+   - `nero_search_knowledge` (sinonimos, titulos, nomes antigos);
+   - `nero_get_project_context` quando houver projeto (`activeDecisions` vigentes; `supersededDecisions` historico);
+   - `nero_get_domain_context` quando o escopo for de dominio;
+   - `nero_find_related_knowledge` antes de criar regra/padrao/decisao nova;
+   - fallback: busca em `<KNOWLEDGE_REPO>/` se o MCP estiver indisponivel.
 
-6. Atualize sem duplicar, respeitando relacoes MCP:
-   - se o conhecimento ja existir, complemente a nota vigente (nao crie clone por arquivo, data, projeto, titulo ou sinonimo);
-   - mudanca de orientacao em decisao: crie nova nero_register_decision com supersedes: [<id-ou-path da decision antiga>] (somente decision→decision; nao colapsar em updates);
-   - evolucao de padrao/regra/troubleshooting/snapshot: preferir completar a nota vigente; se precisar de nova nota, ligue com updates (via frontmatter/fallback ou nero_link_knowledge apos indexacao), nunca supersedes;
-   - ao ligar conhecimento, use apenas o vocabulario preferencial:
-     belongs_to_domain, documents, evidences, updates, depends_on, uses_backend, related_decision, related_pattern, source_for;
-   - especial: supersedes apenas decision→decision;
-   - proibido: relates_to, caused_by, used_by, candidate_for_reuse e qualquer tipo fora do vocabulario;
-   - evidences / evidenciaDe deve apontar para nota concreta com slug (nunca hub como domains/*/patterns, projects/*/decisions, index ou context);
-   - depends_on / uses_backend: orientacao consumer → backend (nunca API/lib → Front/Mobile);
-   - mapeamentos dos writers MCP:
-     - snapshot: relacionadoA → documents; evidenciaDe → evidences;
-     - troubleshooting: causadoPor → related_decision|documents; relacionadoA → related_pattern|related_decision|documents;
-     - pattern: usadoPor → source_for; candidatoParaReuso → documents|related_pattern|related_decision;
-     - business_rule / validation_rule / decision: writers ja emitem documents (+ belongs_to_domain quando houver dominio).
+6. Atualize a nota vigente ou ligue a evolucao.
+   Done when: cada item e complemento da vigente, nova decision com `supersedes`, ou nota nova ligada com `updates` — um significado, um path.
+   Vocabulario e mapeamento de campos: `references/knowledge-routing.md` e `references/mcp-tools.md`.
+   - mudanca de orientacao em decisao: nova `nero_register_decision` com `supersedes: [<id-ou-path da decision antiga>]` (somente decision→decision);
+   - evolucao de padrao/regra/troubleshooting/snapshot: completar a vigente; nota nova liga com `updates`;
+   - `evidences` / `evidenciaDe` → nota concreta com slug;
+   - `depends_on` / `uses_backend`: consumer → backend.
 
-7. Registre no Knowledge Repo:
-   - prefira sempre nero_register_* correspondente ao tipo;
-   - preencha origem com referencia sanitizada da wiki;
-   - escrita direta em <KNOWLEDGE_REPO>/ apenas como fallback (MCP indisponivel/falha/tipo sem writer); use templates do Schema/scaffold;
-   - notas de conteudo precisam de links: nao vazio;
-   - nao use nero_link_knowledge para substituir links: no Markdown: a tool cria edge no SQLite sem alterar frontmatter; prefira writers que ja emitem links:.
+7. Registre no Knowledge Repo.
+   Done when: o lote serial usou `nero_register_*` (ou fallback documentado), cada nota de conteudo tem `links:` nao vazio, e `origem` cita a wiki sanitizada.
+   - escrita direta em `<KNOWLEDGE_REPO>/` so como fallback; templates do Schema/scaffold;
+   - relacao canonica: `links:` no Markdown via writer; `nero_link_knowledge` so para edge entre nodes ja indexados.
 
-8. Valide antes de concluir (checklist MCP + git):
-   - nero_admin_reindex;
-   - nero_admin_validate — so prossiga se isValid e isCompliant forem true;
-   - nero_admin_compliance_scan — se isCompliant=false, triage hits mascarados (ou quarentena);
-   - opcional: nero_admin_check_index_consistency se houver suspeita de desalinhamento;
-   - confirme ausencia de duplicacao obvia e links quebrados;
-   - rode git -C <KNOWLEDGE_REPO> diff --check (ou nero_admin_git_status).
+8. Valide antes de concluir.
+   Done when: `nero_admin_validate` retorna `isValid=true` e `isCompliant=true`, e `diff --check` (ou `nero_admin_git_status`) esta limpo.
+   Execute o checklist em `references/workflow.md` e `references/compliance-security.md` (`nero_admin_reindex` uma vez, depois `nero_admin_validate`).
 
 9. Se houver alteracoes no Knowledge Repo:
-   - preferir nero_admin_create_commit + nero_admin_git_push;
-   - fallback: git -C <KNOWLEDGE_REPO> add . ; commit -m "knowledge: ingest wiki" ; push.
+   Done when: commit (e push, se pedido) cobre so paths allowlisted, ou a secao foi omitida porque o diff estava vazio.
+   Preferir `nero_admin_create_commit` + `nero_admin_git_push`. Mensagem: `knowledge: ingest wiki`. Gates e fallback shell: `references/compliance-security.md`.
 
-10. No resumo final, informe:
-   - intervalo processado;
-   - arquivos da wiki lidos;
-   - notas criadas, atualizadas ou superseded (cite ids/paths e relacoes usadas);
-   - tools MCP usadas;
-   - resultado de nero_admin_validate / reindex;
-   - lacunas ou informacoes ignoradas (incluindo material sensivel descartado).
+10. Resumo final.
+    Done when: os itens abaixo citam paths/tools/resultados reais deste run (ou “omitido” com motivo).
+    - intervalo processado;
+    - arquivos da wiki lidos;
+    - notas criadas, atualizadas ou superseded (ids/paths e relacoes);
+    - tools MCP usadas;
+    - resultado de `nero_admin_validate` / reindex;
+    - lacunas ou informacoes ignoradas (incluindo material sensivel descartado).
