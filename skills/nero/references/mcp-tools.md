@@ -9,7 +9,7 @@ Inputs, outputs e contratos por tool. Ordem do lote: `workflow.md`. Significado 
 | Search / contexto / grafo | `nero_search_knowledge`, `nero_get_project_context`, `nero_get_domain_context`, `nero_find_related_knowledge`                                                                                                                                                         |
 | Projeto e dominio         | `nero_register_project`, `nero_register_domain`, `nero_update_domain`, `nero_inactivate_domain`, `nero_update_project_index`, `nero_update_project_context`, `nero_update_project_inventory`                                                                          |
 | Notas                     | `nero_register_pattern`, `nero_register_validation_rule`, `nero_register_snapshot`, `nero_register_troubleshooting`, `nero_register_business_rule`, `nero_register_decision`, `nero_link_knowledge` (business_rule/decision: schema no MCP; mesmo contrato de writer) |
-| Admin                     | `nero_admin_status`, `nero_admin_validate`, `nero_admin_compliance_scan`, `nero_admin_trust_audit`, `nero_admin_reindex`, `nero_admin_check_index_consistency`, `nero_admin_project_health`, `nero_admin_ecosystem_health`                                            |
+| Admin                     | `nero_admin_status`, `nero_admin_validate`, `nero_admin_compliance_scan`, `nero_admin_finalize_batch`, `nero_admin_trust_audit`, `nero_admin_reindex`, `nero_admin_check_index_consistency`, `nero_admin_project_health`, `nero_admin_ecosystem_health`                     |
 | Git                       | `nero_admin_git_status`, `nero_admin_git_fetch`, `nero_admin_git_pull`, `nero_admin_create_commit`, `nero_admin_git_push`                                                                                                                                             |
 
 ## Contrato dos writers
@@ -637,6 +637,23 @@ Output:
 ```
 
 Quando `isValid=false` ou `isCompliant=false`, `actionableGaps` agrega gaps estruturais e `compliance: ...` (trechos ja mascarados).
+
+## `nero_admin_finalize_batch`
+
+Finaliza um lote explicito de Markdown sem persistir estado de lote. Input:
+
+```json
+{
+  "expectedPaths": [
+    "projects/Acme.Api/decisions/2026-08-24-example.md",
+    "projects/Acme.Api/snapshots/2026-08-24-evidence.md"
+  ]
+}
+```
+
+Aceita de 1 a 100 paths unicos, relativos ao Knowledge Repo, sob `global/`, `domains/` ou `projects/`; nao use prefixo `knowledge/`. Ordem fixa: comprovar Markdown, compliance como gate, um reindex, validate e comprovar cada path no SQLite.
+
+O resultado retorna `success`, paths encontrados/ausentes/indexados, evidencia de compliance e validacao, `stages`, `failedStage` e recomendacao. Arquivo ausente ou hit P0 ativo interrompe as etapas seguintes. Warning/quarentena nao falha compliance; uma nota esperada em quarentena falha `IndexEvidence` porque nao entra no indice. A tool nao escreve Markdown, nao commita e nao faz push.
 
 ## `nero_admin_trust_audit`
 

@@ -4,7 +4,7 @@
 
 Nascer o Nero como motor imparcial (Core + Kit), com Corpus fora do repositório, Clean Genesis no git e superfície compartilhavel sem material de origem corporativa.
 
-Decisões: `CONTEXT.md`, `docs/adr/0001`–`0007`.
+Decisões: `CONTEXT.md`, `docs/adr/0001`–`0008`.
 
 ## Estado atual
 
@@ -131,9 +131,11 @@ Decisões: `CONTEXT.md` (Pack), `docs/adr/0006`.
 ### P0 — Trust e evidência
 
 - [x] Trust audit somente leitura (`nero_admin_trust_audit`): fontes ausentes, marcadores explícitos de notas nunca verificadas/claims não verificáveis, snapshots vencidos e candidatos a arquivo. `asOfDate` reproduz o relatório; a tool não corrige, reindexa nem arquiva automaticamente.
-- [ ] Finalização de lote com evidência: ciclo `write → compliance → reindex → validate → evidências`, retornando arquivos, validade, compliance, indexação, falhas parciais e próximo passo. O escritor não valida o próprio resultado.
+- [x] Finalização de lote com evidência (`nero_admin_finalize_batch`): ciclo `write → compliance → reindex → validate → evidências`, retornando arquivos, validade, compliance, indexação, falhas parciais e próximo passo. O escritor não valida o próprio resultado.
 
 **Contrato E1 (ADR 0007):** audit direto no Markdown canônico; categorias estáveis `MissingSource`, `NeverVerified`, `UnverifiableClaim`, `StaleSnapshot` e `ArchiveCandidate`. Ausência de metadados de verificação não é promovida a “nunca verificada”; esses achados exigem `verification_status` explícito. Frescor usa o mesmo limiar configurável do project health (> 90 dias por padrão); candidato a arquivo começa em 365 dias e permanece report-only. O experimento escolheu tool MCP para tornar classificação, ordenação e zero escrita testáveis; playbook fica adiado até demonstrar valor adicional.
+
+**Contrato E2 (ADR 0008):** finalização stateless sobre paths explícitos; arquivos ausentes e compliance P0 bloqueiam o reindex. Após um único reindex, validação e consulta ao SQLite comprovam cada path. Falhas preservam evidência das etapas executadas; não há escrita no corpus, commit ou push automático.
 
 **DoD P0:** fixture de Knowledge Repo de teste; zero escrita no audit; relatório reproduzível; lote pequeno de register passa pelo ciclo completo com evidência independente.
 

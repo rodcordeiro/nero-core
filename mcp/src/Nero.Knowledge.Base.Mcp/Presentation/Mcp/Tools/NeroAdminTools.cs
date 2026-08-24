@@ -12,9 +12,51 @@ public sealed class NeroAdminTools(
     AdminStatusService adminStatusService,
     AdminGitService adminGitService,
     AdminKnowledgeMaintenanceService adminKnowledgeMaintenanceService,
+    AdminBatchFinalizationService adminBatchFinalizationService,
     AdminTrustAuditService adminTrustAuditService,
     ILogger<NeroAdminTools>? logger = null)
 {
+    [McpServerTool]
+    [Description("Finalizes an explicit Markdown write batch through a pre-reindex compliance gate, one reindex, validation and per-path SQLite evidence. Does not write Markdown, commit or push.")]
+    public async Task<NeroAdminFinalizeBatchToolResult> nero_admin_finalize_batch(
+        [Description("One to 100 unique relative Markdown paths under global/, domains/ or projects/. Do not prefix with knowledge/.")]
+        string[] expectedPaths,
+        CancellationToken cancellationToken = default)
+    {
+        return await ExecuteAdminAsync("nero_admin_finalize_batch", async () =>
+        {
+            var result = await adminBatchFinalizationService.FinalizeAsync(expectedPaths, cancellationToken);
+            return new NeroAdminFinalizeBatchToolResult
+            {
+                Success = result.Success,
+                KnowledgeRootPath = result.KnowledgeRootPath,
+                ExpectedPaths = result.ExpectedPaths,
+                FoundMarkdownPaths = result.FoundMarkdownPaths,
+                MissingMarkdownPaths = result.MissingMarkdownPaths,
+                IndexedPaths = result.IndexedPaths,
+                MissingIndexedPaths = result.MissingIndexedPaths,
+                IsCompliant = result.Compliance?.IsCompliant,
+                ActiveBlockingHitCount = result.Compliance?.ActiveBlockingHitCount,
+                WarningHitCount = result.Compliance?.WarningHitCount,
+                ActiveComplianceHits = result.Compliance?.ActiveHits.Select(MapComplianceIssue).ToArray() ?? [],
+                IndexedNodes = result.Reindex?.IndexedNodes,
+                IsValid = result.Validation?.IsValid,
+                NodeCount = result.Validation?.NodeCount,
+                EdgeCount = result.Validation?.EdgeCount,
+                ValidationErrors = result.Validation?.Errors ?? [],
+                ComplianceGaps = result.Validation?.ComplianceGaps ?? [],
+                Stages = result.Stages.Select(stage => new NeroAdminBatchStageToolResult
+                {
+                    Stage = stage.Stage,
+                    Status = stage.Status,
+                    Detail = stage.Detail
+                }).ToArray(),
+                FailedStage = result.FailedStage,
+                Recommendation = result.Recommendation
+            };
+        });
+    }
+
     [McpServerTool]
     [Description("Audits trust signals in the canonical Markdown corpus without writing files or changing the derived index. Reports missing sources, never-verified notes, unverifiable claims, stale snapshots and archive candidates.")]
     public async Task<NeroAdminTrustAuditToolResult> nero_admin_trust_audit(

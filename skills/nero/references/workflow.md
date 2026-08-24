@@ -29,6 +29,7 @@ Done when: a mudanca de codigo (se houver) cita path no checkout, e o lote de kn
 
  1. Implementar a menor mudanca verificavel. Codigo de produto: filesystem obrigatorio.
  2. Conhecimento reutilizavel: `nero_register_*` no fim, **serial**. Sem MCP: templates do Schema.
+ 3. Finalizar o lote com `nero_admin_finalize_batch`, passando todos os paths relativos retornados pelos writers. A tool faz compliance, um reindex, validate e evidencia por path. Sem a tool, executar o checklist manual de `compliance-security.md`.
 
 ## Hibrido MCP + checkout
 

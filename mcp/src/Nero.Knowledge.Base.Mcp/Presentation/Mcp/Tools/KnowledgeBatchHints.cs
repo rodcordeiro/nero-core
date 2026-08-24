@@ -3,7 +3,7 @@ namespace Nero.Knowledge.Base.Mcp.Presentation.Mcp.Tools;
 internal static class KnowledgeBatchHints
 {
     public const string WriteRecommendation =
-        "The Markdown was written, but the SQLite index may be stale. Finish the write batch, then run nero_admin_reindex once.";
+        "The Markdown was written, but the SQLite index may be stale. Finish the write batch, then prefer nero_admin_finalize_batch with every returned relative path; otherwise run nero_admin_reindex once and nero_admin_validate.";
 
     public const string ReindexRecommendation =
         "Run nero_admin_validate next before trusting the index or committing knowledge changes.";

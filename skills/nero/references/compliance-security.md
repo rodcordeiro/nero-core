@@ -21,14 +21,15 @@ Done when: a escrita passou, ou `Category: Compliance` / `Security` foi corrigid
 
 ## Apos o lote
 
-Done when: `nero_admin_validate` retorna `isValid=true` e `isCompliant=true`.
+Done when: `nero_admin_finalize_batch` retorna `success=true`, ou o fallback manual termina com `isValid=true` e `isCompliant=true`.
 
-1. `nero_admin_reindex` uma vez (writers so gravam Markdown).
-2. `nero_admin_validate`.
-3. (Opcional) `nero_admin_compliance_scan` para triage.
-4. (Opcional) `nero_admin_check_index_consistency` se MCP ↔ filesystem divergirem.
+1. Preferencial: `nero_admin_finalize_batch` com todos os paths retornados pelos writers. Exigir `success=true`, `isValid=true`, `isCompliant=true` e `missingIndexedPaths=[]`.
+2. Fallback manual: `nero_admin_compliance_scan`; se houver hit P0 ativo, parar antes do reindex.
+3. `nero_admin_reindex` uma vez (writers so gravam Markdown).
+4. `nero_admin_validate`: exigir `isValid=true` e `isCompliant=true`.
+5. (Opcional) `nero_admin_check_index_consistency` se MCP ↔ filesystem divergirem.
 
-Search/context/related de notas recem-gravadas depois do passo 1.
+Search/context/related de notas recem-gravadas depois da finalizacao preferencial ou do reindex no fallback.
 
 ## Commit e push
 

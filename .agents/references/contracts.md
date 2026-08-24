@@ -31,7 +31,7 @@ Write/update/link tools include:
 - `nero_register_troubleshooting`
 - `nero_link_knowledge`
 
-Write tools return recommendations for post-write maintenance; callers are expected to reindex and validate after a write batch.
+Write tools return recommendations for post-write maintenance. Prefer `nero_admin_finalize_batch` with the explicit writer paths; the individual compliance, reindex and validation tools remain available.
 
 ## Admin tools
 
@@ -40,6 +40,7 @@ Admin/readiness tools include:
 - `nero_admin_status`
 - `nero_admin_validate`
 - `nero_admin_compliance_scan`
+- `nero_admin_finalize_batch`
 - `nero_admin_trust_audit`
 - `nero_admin_reindex`
 - `nero_admin_check_index_consistency`
@@ -57,6 +58,8 @@ Git admin tools include:
 Treat git admin contracts as high risk: preserve clean-worktree checks, allowlisted paths, compliance scanning, confirmation phrases and non-force behavior.
 
 `nero_admin_trust_audit` reads canonical Markdown directly and never writes or reindexes. Its optional `asOfDate` (`yyyy-MM-dd`) makes age-based findings reproducible. Category codes are stable: `MissingSource`, `NeverVerified`, `UnverifiableClaim`, `StaleSnapshot`, and `ArchiveCandidate`. Verification findings require explicit `verification_status`; absence alone is not proof that verification never happened.
+
+`nero_admin_finalize_batch` accepts one to 100 unique relative Markdown paths under `global/`, `domains/` or `projects/`. It gates on file existence and compliance, reindexes once, validates, then proves every expected path in SQLite. It may update only the derived index; it never writes Markdown or runs git.
 
 ## CLI surface
 

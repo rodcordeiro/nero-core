@@ -108,6 +108,25 @@ public class NeroAdminToolsTests
         Assert.Contains("Recommendation", exception.Message);
     }
 
+    [Fact]
+    public async Task FinalizeBatch_MapsSuccessfulEvidenceContract()
+    {
+        var root = CreateTempKnowledgeRoot();
+        Directory.CreateDirectory(Path.Combine(root, "domains"));
+        Directory.CreateDirectory(Path.Combine(root, "global"));
+        Directory.CreateDirectory(Path.Combine(root, "projects"));
+        await File.WriteAllTextAsync(Path.Combine(root, "global", "index.md"), "# Global");
+        var tools = CreateTools(root);
+
+        var result = await tools.nero_admin_finalize_batch(["global/index.md"]);
+
+        Assert.True(result.Success);
+        Assert.True(result.IsCompliant);
+        Assert.True(result.IsValid);
+        Assert.Equal(["global/index.md"], result.IndexedPaths);
+        Assert.Null(result.FailedStage);
+    }
+
     private static NeroAdminTools CreateTools(string root)
     {
         var databaseOptions = new KnowledgeDatabaseOptions
@@ -124,11 +143,18 @@ public class NeroAdminToolsTests
             new KnowledgeMarkdownReader(),
             new AdminIndexConsistencyOptions(),
             new AdminProjectFreshnessOptions());
+        var batchFinalization = new AdminBatchFinalizationService(
+            rootOptions,
+            new KnowledgeMarkdownReader(),
+            new AdminBatchOperations(
+                maintenance,
+                new KnowledgeIndexedPathReader(new KnowledgeDatabaseConnectionFactory(databaseOptions))));
 
         return new NeroAdminTools(
             new AdminStatusService(databaseOptions, rootOptions, new KnowledgeWriteOptions(), gitCommandRunner),
             new AdminGitService(rootOptions, gitCommandRunner, new KnowledgeWriteOptions()),
             maintenance,
+            batchFinalization,
             new AdminTrustAuditService(rootOptions, new KnowledgeMarkdownReader(), new AdminProjectFreshnessOptions()));
     }
 
