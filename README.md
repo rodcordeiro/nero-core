@@ -129,10 +129,16 @@ Contrato de escrita: `nero_register_*` grava Markdown; o cliente chama `nero_adm
 | --- | --- |
 | Decisões, regras, ops, snapshots | Nero Knowledge (`nero-knowledge-base`) |
 | Estrutura de código (imports, calls, AST) | Pack de code-graph (quando instalado) |
+| Pessoas, 1:1, como colaborar com X | Pack People CRM (vault; `$people-crm`) |
 
-Não unifique arestas AST com `links:` do Knowledge Repo.
+Não unifique arestas AST com `links:` do Knowledge Repo. Não unifique fichas de pessoas com o Knowledge Repo.
 
-**Exemplo:** [nero-code-graph](https://github.com/rodcordeiro/nero-code-graph) — pack MCP de code-graph estrutural (generate / status / query sobre o checkout). Issues no próprio repo; coordenação de backlog no [Nero Scrum board](https://github.com/users/rodcordeiro/projects/14) junto com o Core.
+**Exemplos:**
+
+- [nero-code-graph](https://github.com/rodcordeiro/nero-code-graph) — pack MCP de code-graph estrutural (generate / status / query sobre o checkout).
+- [nero-people-crm](https://github.com/rodcordeiro/nero-people-crm) — pack skill + template + corpus no vault (v0 sem sidecar `people_*`). Promotion deny-clear via `$nero`.
+
+Issues de cada pack no próprio repo; coordenação de backlog no [Nero Scrum board](https://github.com/users/rodcordeiro/projects/14) junto com o Core.
 
 Padrão para criar skills de produto/lib: `skills/nero/references/domain-skills.md`.
 

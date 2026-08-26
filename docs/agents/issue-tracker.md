@@ -6,7 +6,7 @@ Repo: `rodcordeiro/nero-core` (from `git remote`).
 
 ## Hub de backlog Nero
 
-Este repositório é o **hub canônico de coordenação de backlog** dos projetos Nero. Issues de produto Core/Kit vivem aqui; packs e repos satélite (ex. `nero-code-graph`) mantêm issues no próprio repo, mas **todos** entram no mesmo [Nero Scrum board](https://github.com/users/rodcordeiro/projects/14).
+Este repositório é o **hub canônico de coordenação de backlog** dos projetos Nero. Issues de produto Core/Kit vivem aqui; packs e repos satélite (ex. `nero-code-graph`, `nero-people-crm`) mantêm issues no próprio repo, mas **todos** entram no mesmo [Nero Scrum board](https://github.com/users/rodcordeiro/projects/14).
 
 Antes de inventar escopo ou puxar trabalho “next” de outro pack, leia `docs/agents/iteration-workflow.md` (este repo) e o `iteration-workflow.md` do pack em questão — a prioridade do board é compartilhada.
 

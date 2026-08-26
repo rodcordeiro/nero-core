@@ -7,7 +7,7 @@ Preferences for agents working **any Nero repo** against the shared **Nero Scrum
 **`nero-core`** is the coordination hub for Nero backlogs. Agents must not invent parallel priority orders per pack.
 
 - Core / Kit / Genesis / primitives → issues on [`rodcordeiro/nero-core`](https://github.com/rodcordeiro/nero-core/issues).
-- Packs (ex. code-graph) → issues on their own repo, still on board #14.
+- Packs (ex. code-graph, people-crm) → issues on their own repo, still on board #14.
 - Before starting work: check **current** on the board across repos; do not starve agreed pack work by inventing Core scope in current while pack tickets are actionable.
 
 ## Rules

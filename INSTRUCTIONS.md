@@ -124,11 +124,13 @@ O Core funciona sozinho. **Packs** são produtos extras (skill + MCP próprio, q
 | Pergunta | Pack sugerido |
 | --- | --- |
 | Quem importa/chama o quê no código? | [nero-code-graph](https://github.com/rodcordeiro/nero-code-graph) — MCP de code-graph estrutural (generate / status / query). Clone o repo, publique o MCP e adicione a skill conforme o `README`/`AGENTS.md` dele. |
+| Como colaborar com uma pessoa / reunião / 1:1? | [nero-people-crm](https://github.com/rodcordeiro/nero-people-crm) — skill `$people-crm` + template; fichas no vault. Clone, instale a skill, copie `people-crm.local.json.example`. Sem MCP sidecar na v0. |
 
 Regras rápidas:
 
 - Decisões, regras, ops → `nero-knowledge-base` (`$nero`).
 - Estrutura de código (AST, imports, calls) → pack de code-graph.
+- Pessoas / fichas → pack People CRM (vault). Não copie Profiles para o Knowledge Repo.
 - Não misture arestas AST com `links:` do Knowledge Repo.
 
 Backlog dos packs no [Nero Scrum board](https://github.com/users/rodcordeiro/projects/14), issues no repo de cada pack.
@@ -141,7 +143,7 @@ Backlog dos packs no [Nero Scrum board](https://github.com/users/rodcordeiro/pro
 - [ ] DB sob `.nero/` gitignored
 - [ ] Sem skills de produto corporativas / de empregador neste setup
 - [ ] Plano/status: [GitHub Issues](https://github.com/rodcordeiro/nero-core/issues) + specs em `docs/references/`
-- [ ] (Opcional) Packs complementares instalados e MCPs configurados — ex. [nero-code-graph](https://github.com/rodcordeiro/nero-code-graph)
+- [ ] (Opcional) Packs complementares instalados — ex. [nero-code-graph](https://github.com/rodcordeiro/nero-code-graph), [nero-people-crm](https://github.com/rodcordeiro/nero-people-crm)
 
 ## Fora de escopo desta instrução
 

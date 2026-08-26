@@ -11,7 +11,7 @@ Ver ADR `docs/adr/0005-domain-skills-documented-only.md` e `docs/adr/0006-comple
 | Core + Kit (`$nero`) | Repo Nero                                                | workflow MCP, guidelines genericos, playbooks |
 | Knowledge Repo       | Repo separado (`KnowledgeRoot__Path`)                    | corpus Markdown (global/domains/projects)     |
 | Domain Skill         | Repo/skill do usuario ou time                            | auth lib interna, design system, webhook hub  |
-| Pack                 | Fora do canonico (skill + MCP proprio quando houver)     | [nero-code-graph](https://github.com/rodcordeiro/nero-code-graph), People CRM, Content Factory |
+| Pack                 | Fora do canonico (skill + MCP proprio quando houver)     | [nero-code-graph](https://github.com/rodcordeiro/nero-code-graph), [People CRM](https://github.com/rodcordeiro/nero-people-crm), Content Factory |
 
 Um **Pack** e produto complementar (padrao Domain Skill + MCP opcional). O Core nao depende de Pack algum; Packs consomem primitivos do Nero quando existirem (Capture Zone, trust, promocao). Nunca publique Packs dentro de `skills/nero/` no canonico.
 
@@ -26,7 +26,8 @@ Bootstrap de instalacao: README e INSTRUCTIONS na raiz do repo Nero (secao Packs
 | Pack | Repo | Acionar quando |
 | --- | --- | --- |
 | nero-code-graph | https://github.com/rodcordeiro/nero-code-graph | Perguntas estruturais do checkout: imports, calls, vizinhos, path A→B, grafo stale (`cg_*`) |
-| People CRM, Content Factory | produto do usuario | Fluxos editoriais/CRM fora do Schema Nero (ADR 0006) |
+| People CRM | https://github.com/rodcordeiro/nero-people-crm | Profiles, reuniões, 1:1, update de ficha (`$people-crm`); Promotion deny-clear via `$nero` |
+| Content Factory | produto do usuario | Fluxos editoriais fora do Schema Nero (ADR 0006) |
 
 Routing operacional (nao misturar superficies):
 
@@ -34,6 +35,7 @@ Routing operacional (nao misturar superficies):
 | --- | --- |
 | Ops — decisao, regra, troubleshooting, contexto | `nero_*` / `$nero` |
 | Estrutura — `calls`, `imports`, `file:line` | MCP/skill do Pack (`cg_*` para code-graph) |
+| Pessoas / 1:1 / ficha | Pack `$people-crm` (vault Markdown) |
 | Corpo de arquivo / WIP | filesystem |
 
 Ordem quando ambos aplicam: Pack estrutural (status → generate se stale → query) → registrar conclusao operacional com `nero_register_*` se necessario. **Ponte permitida:** citar `file:line` do envelope code-graph em nota Nero — citacao, nao edge em `links:`.
@@ -89,6 +91,7 @@ No `AGENTS.md` da aplicacao, skills condicionais com evidencia (package.json, im
 | Mobile Expo/RN                     | skills RN/Expo + `$nero`          |
 | Sem evidencia                      | omitir a Domain Skill             |
 | Perguntas estruturais de codigo (imports/calls/path) | Pack `nero-code-graph` se instalado (`references/domain-skills.md`) |
+| Profiles, reunioes, 1:1, update de ficha | Pack `$people-crm` se instalado (`references/domain-skills.md`) |
 
 ## Ligacao com Knowledge Repo
 

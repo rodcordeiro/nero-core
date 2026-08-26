@@ -43,10 +43,13 @@ Routing estrutural vs knowledge: `references/domain-skills.md` (instalar, listar
 
 Perguntas **estruturais** do checkout → skill **`nero-code-graph`** e MCP `nero-code-graph` (`cg_*`). **Nao** use `nero_find_related_knowledge` / `links:` para arestas AST.
 
+Pessoas / reunioes / 1:1 / ficha → pack **People CRM** (`$people-crm`) se instalado. **Nao** grave Profiles no Knowledge Repo.
+
 | Tipo | Superficie |
 | --- | --- |
 | Estrutura (`calls`, `imports`, `file:line`) | `cg_*` |
 | Ops (decisao, regra, troubleshooting, contexto) | `nero_*` |
+| Pessoas / 1:1 / ficha | `$people-crm` (vault) |
 | Corpo de arquivo / WIP | filesystem |
 
 ## Playbooks
