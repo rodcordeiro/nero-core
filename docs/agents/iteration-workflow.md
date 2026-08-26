@@ -26,7 +26,7 @@ Open work after genesis migrate (placed in **next**):
 
 | # | Title | Notes |
 | --- | --- | --- |
-| [#10](https://github.com/rodcordeiro/nero-core/issues/10) | Fase 7b — CI mínimo (GitHub Actions) | Pós Clean Genesis |
+| [#10](https://github.com/rodcordeiro/nero-core/issues/10) | Fase 7b — CI mínimo (GitHub Actions) | **closed** (mcp-ci green) |
 | [#12](https://github.com/rodcordeiro/nero-core/issues/12) | Fase 8 P1 — Captura, proveniência e drift | Após P0 (#9 closed) |
 | [#11](https://github.com/rodcordeiro/nero-core/issues/11) | Fase 8 P2 — Superfície MCP derivada | Prefer after P1 |
 

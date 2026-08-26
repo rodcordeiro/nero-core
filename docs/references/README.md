@@ -4,7 +4,7 @@ Canonical work items: [GitHub Issues](https://github.com/rodcordeiro/nero-core/i
 
 | Spec | Issue | Status |
 | --- | --- | --- |
-| [spec-ci-minimo.md](./spec-ci-minimo.md) | [#10](https://github.com/rodcordeiro/nero-core/issues/10) | open |
+| [spec-ci-minimo.md](./spec-ci-minimo.md) | [#10](https://github.com/rodcordeiro/nero-core/issues/10) | closed |
 | [spec-capture-provenance-drift.md](./spec-capture-provenance-drift.md) | [#12](https://github.com/rodcordeiro/nero-core/issues/12) | open |
 | [spec-mcp-derived-surface.md](./spec-mcp-derived-surface.md) | [#11](https://github.com/rodcordeiro/nero-core/issues/11) | open |
 
