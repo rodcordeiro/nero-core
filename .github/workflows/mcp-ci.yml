@@ -1,0 +1,25 @@
+name: mcp-ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    name: restore-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore
+        run: dotnet restore ./mcp/Nero.Knowledge.Base.sln
+
+      - name: Test
+        run: dotnet test ./mcp/Nero.Knowledge.Base.sln --no-restore --verbosity normal
