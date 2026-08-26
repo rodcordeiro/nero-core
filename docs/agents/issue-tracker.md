@@ -43,7 +43,7 @@ Run `gh issue view <number> --comments`.
 
 ## Local seed notes
 
-`docs/backlog.md` is the design-session / genesis seed. Canonical work items live in GitHub Issues after migrate. Do not treat `docs/backlog.md` as the live issue tracker once issues exist on GitHub — keep it as historical index + pointers.
+Canonical work items live in GitHub Issues. Implementation specs for open roadmap slices live under `docs/references/` (see `docs/references/README.md`). Do not recreate a parallel markdown backlog tracker in-repo.
 
 ## Iteration / Project board
 

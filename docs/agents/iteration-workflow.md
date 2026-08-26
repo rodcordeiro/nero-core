@@ -30,7 +30,7 @@ Open work after genesis migrate (placed in **next**):
 | [#12](https://github.com/rodcordeiro/nero-core/issues/12) | Fase 8 P1 — Captura, proveniência e drift | Após P0 (#9 closed) |
 | [#11](https://github.com/rodcordeiro/nero-core/issues/11) | Fase 8 P2 — Superfície MCP derivada | Prefer after P1 |
 
-Closed: [#1](https://github.com/rodcordeiro/nero-core/issues/1)–[#9](https://github.com/rodcordeiro/nero-core/issues/9) (fases 0–7 + 8 P0). Seed source: `docs/backlog.md` (no longer the live tracker).
+Closed: [#1](https://github.com/rodcordeiro/nero-core/issues/1)–[#9](https://github.com/rodcordeiro/nero-core/issues/9) (fases 0–7 + 8 P0). Open specs: `docs/references/`.
 
 Pack priority (code-graph Iteration 1 / current) remains documented in that repo’s `docs/agents/iteration-workflow.md`.
 

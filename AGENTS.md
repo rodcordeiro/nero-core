@@ -6,7 +6,7 @@
 - Domain: integracoes, with explicit MCP server surface.
 - Stack: .NET 8 MCP server over stdio, Codex skill/playbook kit, guidelines and knowledge scaffold examples.
 - Purpose: knowledge base motor for agents; the canonical corpus lives in an external Knowledge Repo, not in this repository.
-- Primary entrypoints: `skills/nero/SKILL.md`, `skills/nero/prompts/`, `skills/nero/references/`, `mcp/Nero.Knowledge.Base.sln`, `docs/adr/`.
+- Primary entrypoints: `skills/nero/SKILL.md`, `skills/nero/prompts/`, `skills/nero/references/`, `mcp/Nero.Knowledge.Base.sln`, `docs/adr/`, `docs/references/`.
 
 ## How to use this context
 
@@ -20,6 +20,7 @@
 | Local conventions | `.agents/references/conventions.md` |
 | Observed patterns | `.agents/references/patterns.md` |
 | Known debt | `.agents/references/tech-debt.md` |
+| Roadmap specs (open work) | `docs/references/` (index: `docs/references/README.md`) |
 | Integracoes/API guideline | `$nero -> references/guidelines/api-guidelines.md` (integracoes inherits API) |
 | MCP guideline | `$nero -> references/guidelines/mcp-guidelines.md` |
 

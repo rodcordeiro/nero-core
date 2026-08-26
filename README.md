@@ -12,7 +12,7 @@ O Corpus de domínio **não** vive neste repositório. Cada pessoa mantém um **
 4. Vincule a skill `skills/nero` no seu cliente de agente.
 5. Bootstrap detalhado: [INSTRUCTIONS.md](./INSTRUCTIONS.md).
 
-Glossário: [CONTEXT.md](./CONTEXT.md). Plano: [docs/backlog.md](./docs/backlog.md). Decisões: [docs/adr/](./docs/adr/).
+Glossário: [CONTEXT.md](./CONTEXT.md). Backlog: [GitHub Issues](https://github.com/rodcordeiro/nero-core/issues) ([Nero Scrum board](https://github.com/users/rodcordeiro/projects/14)). Specs: [docs/references/](./docs/references/). Decisões: [docs/adr/](./docs/adr/).
 
 ## O que é / o que não é
 
@@ -40,6 +40,8 @@ dotnet test .\mcp\Nero.Knowledge.Base.sln
 dotnet build .\mcp\Nero.Knowledge.Base.sln -c Release --no-restore
 dotnet publish .\mcp\src\Nero.Knowledge.Base.Mcp\Nero.Knowledge.Base.Mcp.csproj -c Release --no-build -o .\mcp\publish
 ```
+
+CI (GitHub Actions): workflow [`mcp-ci`](.github/workflows/mcp-ci.yml) — `restore` + `test` da solution MCP em PRs e em `main` (NuGet público apenas; sem publish).
 
 DLL: `<NERO_REPO>\mcp\publish\staged\Nero.Knowledge.Base.Mcp.dll`
 

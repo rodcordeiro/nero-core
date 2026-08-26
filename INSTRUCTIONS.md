@@ -122,7 +122,7 @@ Exit `0` esperado. No chat: `nero_admin_status` / busca trivial.
 - [ ] `KnowledgeRoot__Path` = Knowledge Repo pessoal
 - [ ] DB sob `.nero/` gitignored
 - [ ] Sem skills de produto corporativas / de empregador neste setup
-- [ ] Plano/status: `docs/backlog.md` no Nero (somente leitura operacional)
+- [ ] Plano/status: [GitHub Issues](https://github.com/rodcordeiro/nero-core/issues) + specs em `docs/references/`
 
 ## Fora de escopo desta instrução
 
