@@ -37,3 +37,21 @@
 - Use `$dotnet-backend-patterns` for changes under `mcp/` or any .NET MCP server behavior.
 - Apply `$nero -> references/guidelines/api-guidelines.md` for integracoes/API concerns and `$nero -> references/guidelines/mcp-guidelines.md` for MCP server, tools, resources, prompts, transport and host behavior.
 - Omit product Domain Skills unless the checkout contains concrete evidence for that product/lib; Nero only documents the extension pattern.
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues neste repo, no Nero Scrum board (#14); hub de backlog dos projetos Nero. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Vocabulário canônico Matt Pocock (1:1). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+single-context (`CONTEXT.md` + `docs/adr/`). See `docs/agents/domain.md`.
+
+### Iteration / Project board
+
+Nero Scrum board: prefer **current**; new tasks → **next**. Hub de coordenação em `docs/agents/iteration-workflow.md`.
