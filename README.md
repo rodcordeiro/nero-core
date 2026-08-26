@@ -121,6 +121,21 @@ Ver [examples/knowledge-scaffold/README.md](./examples/knowledge-scaffold/README
 
 Contrato de escrita: `nero_register_*` grava Markdown; o cliente chama `nero_admin_reindex` após o lote, depois `nero_admin_validate`.
 
+## Packs complementares
+
+**Packs** são produtos opcionais fora do Nero canônico: skill, templates e (quando fizer sentido) MCP próprio. O **Core** permanece entregável com zero Packs instalados — Schema fechado, sem tools `nero_*` de produto (ADR [0006](./docs/adr/0006-complementary-packs-core-independent.md)).
+
+| Papel | Onde |
+| --- | --- |
+| Decisões, regras, ops, snapshots | Nero Knowledge (`nero-knowledge-base`) |
+| Estrutura de código (imports, calls, AST) | Pack de code-graph (quando instalado) |
+
+Não unifique arestas AST com `links:` do Knowledge Repo.
+
+**Exemplo:** [nero-code-graph](https://github.com/rodcordeiro/nero-code-graph) — pack MCP de code-graph estrutural (generate / status / query sobre o checkout). Issues no próprio repo; coordenação de backlog no [Nero Scrum board](https://github.com/users/rodcordeiro/projects/14) junto com o Core.
+
+Padrão para criar skills de produto/lib: `skills/nero/references/domain-skills.md`.
+
 ## Licença
 
 MIT — ver [LICENSE](./LICENSE).

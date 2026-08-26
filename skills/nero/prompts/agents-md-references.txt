@@ -136,6 +136,7 @@ Caso contrario: omitir.
 | Mobile RN/Expo | skills RN/Expo aplicaveis + `$nero` |
 | Modulo ou scripts PowerShell | `$nero` + guideline powershell |
 | Servidor ou consumidor MCP | `$nero` + guideline mcp |
+| Perguntas estruturais de codigo (imports/calls/path) | Pack `nero-code-graph` se instalado (`$nero` → `references/domain-skills.md`) |
 
 ---
 

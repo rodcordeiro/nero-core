@@ -27,7 +27,7 @@ Done when: `activeDecisions` vigentes (ou `context.md`) foram lidas, e precedent
 
 Done when: a mudanca de codigo (se houver) cita path no checkout, e o lote de knowledge — se houve escrita — passou o checklist em `compliance-security.md`.
 
- 1. Implementar a menor mudanca verificavel. Codigo de produto: filesystem obrigatorio.
+ 1. Implementar a menor mudanca verificavel. Codigo de produto: filesystem obrigatorio. Perguntas estruturais (imports/calls/path): Pack code-graph se instalado — routing em `domain-skills.md` e secao Packs em `$nero` SKILL.
  2. Conhecimento reutilizavel: `nero_register_*` no fim, **serial**. Sem MCP: templates do Schema.
  3. Finalizar o lote com `nero_admin_finalize_batch`, passando todos os paths relativos retornados pelos writers. A tool faz compliance, um reindex, validate e evidencia por path. Sem a tool, executar o checklist manual de `compliance-security.md`.
 

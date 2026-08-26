@@ -115,7 +115,25 @@ dotnet run --project <NERO_REPO>\mcp\src\Nero.Knowledge.Base.Mcp\Nero.Knowledge.
 
 Exit `0` esperado. No chat: `nero_admin_status` / busca trivial.
 
-## 8. Checklist final
+## 8. Packs complementares (opcional)
+
+O Core funciona sozinho. **Packs** são produtos extras (skill + MCP próprio, quando houver) em repositórios separados — não entram em `skills/` do Nero canônico. Veja [README — Packs complementares](./README.md#packs-complementares) e ADR [0006](./docs/adr/0006-complementary-packs-core-independent.md).
+
+**Sugestão:** depois do smoke test do Nero Knowledge, instale packs que complementem o fluxo:
+
+| Pergunta | Pack sugerido |
+| --- | --- |
+| Quem importa/chama o quê no código? | [nero-code-graph](https://github.com/rodcordeiro/nero-code-graph) — MCP de code-graph estrutural (generate / status / query). Clone o repo, publique o MCP e adicione a skill conforme o `README`/`AGENTS.md` dele. |
+
+Regras rápidas:
+
+- Decisões, regras, ops → `nero-knowledge-base` (`$nero`).
+- Estrutura de código (AST, imports, calls) → pack de code-graph.
+- Não misture arestas AST com `links:` do Knowledge Repo.
+
+Backlog dos packs no [Nero Scrum board](https://github.com/users/rodcordeiro/projects/14), issues no repo de cada pack.
+
+## 9. Checklist final
 
 - [ ] Skill `$nero` resolvida pelo agente
 - [ ] MCP `nero-knowledge-base` up
@@ -123,6 +141,7 @@ Exit `0` esperado. No chat: `nero_admin_status` / busca trivial.
 - [ ] DB sob `.nero/` gitignored
 - [ ] Sem skills de produto corporativas / de empregador neste setup
 - [ ] Plano/status: [GitHub Issues](https://github.com/rodcordeiro/nero-core/issues) + specs em `docs/references/`
+- [ ] (Opcional) Packs complementares instalados e MCPs configurados — ex. [nero-code-graph](https://github.com/rodcordeiro/nero-code-graph)
 
 ## Fora de escopo desta instrução
 

@@ -10,12 +10,35 @@ Ver ADR `docs/adr/0005-domain-skills-documented-only.md` e `docs/adr/0006-comple
 | -------------------- | -------------------------------------------------------- | --------------------------------------------- |
 | Core + Kit (`$nero`) | Repo Nero                                                | workflow MCP, guidelines genericos, playbooks |
 | Knowledge Repo       | Repo separado (`KnowledgeRoot__Path`)                    | corpus Markdown (global/domains/projects)     |
-| Domain Skill         | Repo/skill do usuário ou time                            | auth lib interna, design system, webhook hub  |
-| Pack                 | Fora do canônico (skill + templates + corpus do usuário) | People CRM, Content Factory                   |
+| Domain Skill         | Repo/skill do usuario ou time                            | auth lib interna, design system, webhook hub  |
+| Pack                 | Fora do canonico (skill + MCP proprio quando houver)     | [nero-code-graph](https://github.com/rodcordeiro/nero-code-graph), People CRM, Content Factory |
 
-Um **Pack** é um produto complementar construído com o padrão Domain Skill. O Core não depende de Pack algum; Packs consomem primitivos do Nero quando existirem (Capture Zone, trust, promoção). Nunca publique Packs dentro de `skills/nero/` no canônico.
+Um **Pack** e produto complementar (padrao Domain Skill + MCP opcional). O Core nao depende de Pack algum; Packs consomem primitivos do Nero quando existirem (Capture Zone, trust, promocao). Nunca publique Packs dentro de `skills/nero/` no canonico.
 
 Domain Skills ficam fora de `skills/nero/`. Corpus de produto fica no Knowledge Repo, nao em `skills/nero/knowledge/`.
+
+## Packs conhecidos (fora do canonico)
+
+Done when: o agente sabe **onde instalar** (bootstrap do repo) e **quando acionar** (routing abaixo), sem copiar roteiro de setup aqui.
+
+Bootstrap de instalacao: README e INSTRUCTIONS na raiz do repo Nero (secao Packs complementares) — nao duplicar neste arquivo.
+
+| Pack | Repo | Acionar quando |
+| --- | --- | --- |
+| nero-code-graph | https://github.com/rodcordeiro/nero-code-graph | Perguntas estruturais do checkout: imports, calls, vizinhos, path A→B, grafo stale (`cg_*`) |
+| People CRM, Content Factory | produto do usuario | Fluxos editoriais/CRM fora do Schema Nero (ADR 0006) |
+
+Routing operacional (nao misturar superficies):
+
+| Tipo | Superficie |
+| --- | --- |
+| Ops — decisao, regra, troubleshooting, contexto | `nero_*` / `$nero` |
+| Estrutura — `calls`, `imports`, `file:line` | MCP/skill do Pack (`cg_*` para code-graph) |
+| Corpo de arquivo / WIP | filesystem |
+
+Ordem quando ambos aplicam: Pack estrutural (status → generate se stale → query) → registrar conclusao operacional com `nero_register_*` se necessario. **Ponte permitida:** citar `file:line` do envelope code-graph em nota Nero — citacao, nao edge em `links:`.
+
+Detalhe de tools/env do code-graph: skill `nero-code-graph` no checkout do Pack (`tools.md`, spec em `docs/references/`).
 
 ## Quando criar
 
@@ -65,6 +88,7 @@ No `AGENTS.md` da aplicacao, skills condicionais com evidencia (package.json, im
 | Checkout usa a lib de auth do time | `$acme-auth` (Domain Skill local) |
 | Mobile Expo/RN                     | skills RN/Expo + `$nero`          |
 | Sem evidencia                      | omitir a Domain Skill             |
+| Perguntas estruturais de codigo (imports/calls/path) | Pack `nero-code-graph` se instalado (`references/domain-skills.md`) |
 
 ## Ligacao com Knowledge Repo
 

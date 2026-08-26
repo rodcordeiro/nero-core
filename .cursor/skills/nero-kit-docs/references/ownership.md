@@ -11,7 +11,7 @@ Load this when classifying files in `skills/nero/prompts/` or `skills/nero/refer
 | `compliance-security.md` | Checklist pos-lote, anti-leak, sanitizacao |
 | `mcp-tools.md` | Inputs/outputs por tool, campo→edge, git via MCP, indice no topo |
 | `git-merging.md` | Tres ramos de conflito (snapshot / regra de negocio / codigo) |
-| `domain-skills.md` | Padrao de extensao fora do canonico |
+| `domain-skills.md` | Padrao de extensao fora do canonico; Packs conhecidos e routing estrutural vs knowledge |
 | `guidelines/<dominio>.md` | Regras daquele dominio (`integracoes` herda `api`) |
 
 `prompts/index.md` e router: um trigger por playbook. A recommendation MCP aponta o path; o roteiro vive no arquivo.

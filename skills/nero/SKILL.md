@@ -1,6 +1,10 @@
 ---
 name: nero
-description: Motor de knowledge base Nero (MCP + Schema). Use para consultar, relacionar e registrar conhecimento operacional em um Knowledge Repo externo (global → dominio → projeto), com guidelines e playbooks do Kit.
+description: >-
+  Motor de knowledge base Nero (MCP + Schema). Use para consultar, relacionar e
+  registrar conhecimento operacional (global → dominio → projeto). Perguntas
+  estruturais de codigo (who-calls, imports, path) → skill `nero-code-graph`
+  (`cg_*`), nao `nero_*` / `links:`.
 ---
 
 # Nero
@@ -33,6 +37,18 @@ Fluxo completo e hibrido MCP+filesystem: `references/workflow.md`.
 Tools, contratos e payloads: `references/mcp-tools.md`.
 Compliance/security pos-register: `references/compliance-security.md`.
 
+### Packs complementares
+
+Routing estrutural vs knowledge: `references/domain-skills.md` (instalar, listar, quando acionar).
+
+Perguntas **estruturais** do checkout → skill **`nero-code-graph`** e MCP `nero-code-graph` (`cg_*`). **Nao** use `nero_find_related_knowledge` / `links:` para arestas AST.
+
+| Tipo | Superficie |
+| --- | --- |
+| Estrutura (`calls`, `imports`, `file:line`) | `cg_*` |
+| Ops (decisao, regra, troubleshooting, contexto) | `nero_*` |
+| Corpo de arquivo / WIP | filesystem |
+
 ## Playbooks
 
 Playbooks em `prompts/` (indice: `prompts/index.md`). Se uma tool retornar `recommendation` com path de playbook, carregue o arquivo relativo ao repo da skill e execute-o.
@@ -55,11 +71,12 @@ Templates do Schema/scaffold so como fallback.
 | `references/knowledge-routing.md` | Camada, promocao, `links:`, Dono, checklist grafo |
 | `references/git-merging.md` | Conflitos de merge no Knowledge Repo |
 | `references/guidelines/` | Estruturacao por dominio (`api`/`front`/`mobile`/`powershell`/`mcp`; `integracoes` herda api) |
-| `references/domain-skills.md` | Como criar/usar Domain Skills **fora** do Nero |
+| `references/domain-skills.md` | Domain Skills e Packs **fora** do Nero; instalar/listar/routing |
+| Skill `nero-code-graph` | Who-calls / imports / path / freshness / `cg_*` vs Nero |
 | `prompts/index.md` | Indice de playbooks |
 
 ## Domain Skills
 
-Skills de produto, lib ou organizacao **nao** fazem parte do canônico Nero. Implemente-as e acione-as fora deste repositorio.
+Skills de produto, lib ou organizacao **nao** fazem parte do canonico Nero. Implemente-as e acione-as fora deste repositorio.
 
 Guia: `references/domain-skills.md`.
